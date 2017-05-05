@@ -50,15 +50,7 @@ the sdl2:with-init code."
   (setf *x-res* x
 	*y-res* y))
 
-(defparameter *renderer* nil)
-(defparameter *win* nil)
-(defparameter *tex* nil)   ;; canvas
-(defparameter *pal* nil)
-
-;;;(defun init-palette ()
-;;;  (setq *pal* (
-
-(defun draw-line (x1 y1 z1 x2 y2 z2 &optional (renderer *renderer*))
+(defun draw-line (x1 y1 z1 x2 y2 z2 renderer)
   (let* ((p1 (sb-cga:vec x1 y1 z1))
 	 (p2 (sb-cga:vec x2 y2 z2))
 	 (tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
@@ -72,7 +64,7 @@ the sdl2:with-init code."
      renderer
      sx1 sy1 sx2 sy2)))
 
-(defun draw-axes (&optional (renderer *renderer*))
+(defun draw-axes (renderer)
   (sdl2:set-render-draw-color renderer 255 0 0 255)
   (draw-line 0.0 0.0 0.0 1.0 0.0 0.0 renderer)
   (sdl2:set-render-draw-color renderer 0 255 0 255)
@@ -82,7 +74,7 @@ the sdl2:with-init code."
     
 (let ((coords (make-array 6 :element-type
 			  '(signed-byte 32))))
-  (defun draw-triangle (tri &optional (renderer *renderer*))
+  (defun draw-triangle (tri renderer)
     (loop for i below 3 do
 	 (let* ((tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
 		(tv (sb-cga:transform-point 
@@ -94,11 +86,6 @@ the sdl2:with-init code."
 	   ;;    (aref tri i) tv x y)
 	   (setf (aref coords (* 2 i))       (round x)
 		 (aref coords (1+ (* 2 i)))  (round y))))
-    (let ((ptr (autowrap:ptr (sdl2-ffi.functions:sdl-get-window-surface *win*))))
-      (loop for x below 8000 do
-	   (setf (cffi:mem-ref ptr :unsigned-char 
-			       (random 160000))
-			     (random 255))))
     (sdl2:render-draw-line 
      renderer
      (aref coords 0) (aref coords 1)
@@ -130,11 +117,8 @@ the sdl2:with-init code."
       (sdl2:with-init (:everything)
 	(sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			       :w *x-res* :h *y-res*)
-	  (setq *win* win)			       
-	  (sdl2:with-renderer (renderer win :flags '(:software))
-	    (setq 
-	     *renderer* renderer
-	     *tex* (sdl2:create-texture renderer :rgba8888 :streaming *x-res* *y-res*))
+			       
+	  (sdl2:with-renderer (renderer win :flags '(:accelerated :presentvsync))
 	    (sdl2:with-event-loop (:method :poll)
 	      (:idle
 	       ()
@@ -145,7 +129,7 @@ the sdl2:with-init code."
 		 (rotate)
 		 (sdl2:set-render-draw-color renderer
 					     255 255 255 255)
-		 (draw-triangle *tri-verts*)
+		 (draw-triangle *tri-verts* renderer)
 		 (sdl2:render-present renderer)
 		 )
 	       #+SWANK (update-swank))
