@@ -31,9 +31,9 @@ the sdl2:with-init code."
 (defparameter *tri-verts* 
   (make-array 3 :initial-contents
 	      (list
-	       (sb-cga:vec -1.0 -1.0 0.0)
-	       (sb-cga:vec 1.0 -1.0 0.0)
-	       (sb-cga:vec 0.0 1.0 0.0))))
+	       (sb-cga:vec -4.0  -4.0  0.0)
+	       (sb-cga:vec  4.0  -4.0  0.0)
+	       (sb-cga:vec  0.0   4.0  0.0))))
 
 (defparameter *vmat* 
   (look-at (sb-cga:normalize (sb-cga:vec 0.0 1.0 1.0))
@@ -50,6 +50,17 @@ the sdl2:with-init code."
   (setf *x-res* x
 	*y-res* y))
 
+;;;; NOTE:
+;;;; Reason using SDL to draw lines here and elsewhere, instead of writing custom
+;;;; code that draws pixels direct to the buffer in Lisp itself, is because foreign function
+;;;; calls and (I suspect, but not 100% certain) foreign memory alterations are not
+;;;; a free lunch (performance-wise) in Lisp.  This probably means, for filled/textured
+;;;; polygons later on, will write custom C-based API to do such 2D-ish operations and
+;;;; glue it into here w/ Lisp bindings;  to be designed around doing as much as possible
+;;;; with as few foreign calls as possible.
+;;;;
+;;;; If any Lisp experts can tell me if I'm full of crap or if I'm overlooking something
+;;;; in my presumptions, please let me know :)
 (defun draw-line (x1 y1 z1 x2 y2 z2 renderer)
   (let* ((p1 (sb-cga:vec x1 y1 z1))
 	 (p2 (sb-cga:vec x2 y2 z2))
@@ -82,8 +93,6 @@ the sdl2:with-init code."
 		     tmat))
 		(x (* (/ (1+ (aref tv 0)) 2.0) *x-res*))
 		(y (* (/ (- 1 (aref tv 1)) 2.0) *y-res*)))
-	   ;; (format t "~a --> ~a --> (~a, ~a)~%" 
-	   ;;    (aref tri i) tv x y)
 	   (setf (aref coords (* 2 i))       (round x)
 		 (aref coords (1+ (* 2 i)))  (round y))))
     (sdl2:render-draw-line 
@@ -111,27 +120,26 @@ the sdl2:with-init code."
 	  (look-at 
 	   (sb-cga:normalize
 	    (sb-cga:vec 0.0 1.0 1.0))
-	   ;;(sb-cga:vec 0.0 10.0 (* 16.0 (sin (* 0.0025 (sdl2:get-ticks)))))
 	   (sb-cga:vec 0.0 0.0 0.0)
 	   (sb-cga:vec 1.0 0.0 0.0)))
-      (sdl2:with-init (:everything)
-	(sdl2:with-window (win :title "Learn3D" :flags '(:shown)
-			       :w *x-res* :h *y-res*)
-			       
-	  (sdl2:with-renderer (renderer win :flags '(:accelerated :presentvsync))
-	    (sdl2:with-event-loop (:method :poll)
-	      (:idle
-	       ()
-	       (sleep (/ 1.0 60))
-	       (continuable
-		 (sdl2:set-render-draw-color renderer 0 0 0 255)
-		 (sdl2:render-clear renderer)
-		 (rotate)
-		 (sdl2:set-render-draw-color renderer
-					     255 255 255 255)
-		 (draw-triangle *tri-verts* renderer)
-		 (sdl2:render-present renderer)
-		 )
-	       #+SWANK (update-swank))
-	      (:quit () t)))))))
+    (sdl2:with-init (:everything)
+      (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
+			     :w *x-res* :h *y-res*)
+	
+	(sdl2:with-renderer (renderer win :flags '(:accelerated :presentvsync))
+	  (sdl2:with-event-loop (:method :poll)
+	    (:idle
+	     ()
+	     (sleep (/ 1.0 60))
+	     (continuable
+	       (sdl2:set-render-draw-color renderer 0 0 0 255)
+	       (sdl2:render-clear renderer)
+	       (rotate)
+	       (sdl2:set-render-draw-color renderer
+					   255 255 255 255)
+	       (draw-triangle *tri-verts* renderer)
+	       (sdl2:render-present renderer)
+	       )
+	     #+SWANK (update-swank))
+	    (:quit () t)))))))
 

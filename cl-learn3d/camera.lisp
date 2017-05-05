@@ -20,15 +20,8 @@
 	(sb-cga:matrix (aref vx 0)  (aref vy 0)  (aref vz 0)  0.0
 		       (aref vx 1)  (aref vy 1)  (aref vz 1)  0.0
 		       (aref vx 2)  (aref vy 2)  (aref vz 2)  0.0
-		       dotxi-       dotyi-       dotzi-       1.0))
-	;;(sb-cga:matrix (aref vx 0)  (aref vx 1)  (aref vx 2)  0.0
-	;;	       (aref vy 0)  (aref vy 1)  (aref vy 2)  0.0
-	;;	       (aref vz 0)  (aref vz 1)  (aref vz 2)  0.0
-	;;	       (aref eye 0) (aref eye 1) (aref eye 2) 1.0)
-	 )
+		       dotxi-       dotyi-       dotzi-       1.0)))
     ivm))
-	 ;;;(sb-cga:inverse-matrix ivm)
-
 
 (defun ortho-projection (width height near far)
   "Returns a Projection matrix."
