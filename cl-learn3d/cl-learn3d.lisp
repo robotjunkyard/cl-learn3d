@@ -3,6 +3,8 @@
 (in-package #:cl-learn3d)
 
 (defparameter *model* nil)
+(defparameter *delay* 90.0)
+(defparameter *font* nil)
 
 (defmacro with-main (&body body)
   "Enables REPL access via UPDATE-SWANK in the main loop using SDL2. Wrap this around
@@ -59,27 +61,31 @@ the sdl2:with-init code."
 	(axis-rotate (sb-cga:vec 0.0 0.0 1.0)
 		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))
 
+(defstruct dbgvert
+  x1 y1 x2 y2 x3 y3)
+(defparameter *debug-tris* (make-array 4096 :adjustable t :fill-pointer 0))
 (defun render-stuff (renderer)
   (sdl2:set-render-draw-color renderer 0 0 0 255)
   (sdl2:render-clear renderer)
   (rotate)
   (sdl2:set-render-draw-color renderer 64 127 255 255)
-  (let* ((tick (sdl2:get-ticks))    ;; fix later
-	 (rx (truncate (* 30.0 (sin (* 0.005 tick)))))
-	 (ry (truncate (* 30.0 (cos (* 0.005 tick))))))
-    (draw-2d-filled-triangle (- (truncate *x-res* 2) rx)
-			     (+ ry 30)
-			     
-			     (+ rx 30)
-			     (+ ry (- *y-res* 60))
-			     
-			     (+ rx (- *x-res* 60))
-			     (+ ry (- *y-res* 100))
-			     renderer))
-  (when *model*
+  (let ((x1 (random *x-res*))
+	(x2 (random *x-res*))
+	(x3 (random *x-res*))
+	(y1 (random *y-res*))
+	(y2 (random *y-res*))
+	(y3 (random *y-res*)))
+    (draw-2d-filled-triangle 
+     x1 y1 x2 y2 x3 y3
+     renderer
+     :PRINT-STATS nil)
+    (format t "~d~%" (length *debug-tris*))
+    (vector-push-extend (make-dbgvert :x1 x1 :y1 y1 :x2 x2 :y2 y2 :x3 x3 :y3 y3) *debug-tris*))
+
+  #|(when *model*
     (draw-axes renderer)
     (sdl2:set-render-draw-color renderer 207 205 155 255)
-    (draw-mesh *model* renderer))
+    (draw-mesh *model* renderer))|#
   (sdl2:render-present renderer))
 
 (defun main ()
@@ -95,14 +101,14 @@ the sdl2:with-init code."
     (sdl2:with-init (:everything)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
-	
 	(sdl2:with-renderer (renderer win :flags '(:accelerated :presentvsync))
 	  (sdl2:with-event-loop (:method :poll)
 	    (:idle
 	     ()
-	     (sleep (/ 1.0 60))
+	     (sleep (/ *delay* 60))
 	     (continuable
 	       (render-stuff renderer))
 	     #+SWANK (update-swank))
-	    (:quit () t)))))))
+	    (:quit ()
+		   t)))))))
 

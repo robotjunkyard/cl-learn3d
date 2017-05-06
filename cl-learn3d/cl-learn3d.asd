@@ -5,8 +5,8 @@
   :author "njb@robotjunkyard.org"
   :license "MIT"
   :depends-on (#:split-sequence  ;; used in parsing .obj file
-	       #:sdl2     ;; Simple Direct Media Layer V2
-	       #:sb-cga)  ;; Nikodemus Siivola's comp. graph. arith. lib
+	       #:sdl2            ;; Simple Direct Media Layer V2
+	       #:sb-cga)         ;; Nikodemus Siivola's comp. graph. arith. lib
   :serial t
   :components ((:file "package")
 	       (:file "eztypes")
