@@ -132,4 +132,4 @@
 		 (aref (aref %tri 2) 0) x3
 		 (aref (aref %tri 2) 1) y3
 		 (aref (aref %tri 2) 2) z3)
-	   (draw-triangle %tri renderer)))))
+	   (draw-3d-triangle %tri renderer)))))
