@@ -2,6 +2,8 @@
 
 (in-package #:cl-learn3d)
 
+(defparameter *model* nil)
+
 (defmacro with-main (&body body)
   "Enables REPL access via UPDATE-SWANK in the main loop using SDL2. Wrap this around
 the sdl2:with-init code."
@@ -40,9 +42,10 @@ the sdl2:with-init code."
 	   (sb-cga:vec 0.0 0.0 0.0)
 	   (sb-cga:vec 1.0 0.0 0.0)))
 (defparameter *pmat*
-  (ortho-projection 64.0 64.0 0.25 64.0))
+  (ortho-projection 8.0 8.0 0.25 8.0))
 (defparameter *rotmat*
   (sb-cga:identity-matrix))
+(defparameter *axis-size* 4.0)
 
 (defparameter *x-res* 640)
 (defparameter *y-res* 480)
@@ -77,11 +80,11 @@ the sdl2:with-init code."
 
 (defun draw-axes (renderer)
   (sdl2:set-render-draw-color renderer 255 0 0 255)
-  (draw-line 0.0 0.0 0.0 1.0 0.0 0.0 renderer)
+  (draw-line 0.0 0.0 0.0 *axis-size* 0.0 0.0 renderer)
   (sdl2:set-render-draw-color renderer 0 255 0 255)
-  (draw-line 0.0 0.0 0.0 0.0 1.0 0.0 renderer)
+  (draw-line 0.0 0.0 0.0 0.0 *axis-size* 0.0 renderer)
   (sdl2:set-render-draw-color renderer 0 0 255 255)
-  (draw-line 0.0 0.0 0.0 0.0 0.0 1.0 renderer))
+  (draw-line 0.0 0.0 0.0 0.0 0.0 *axis-size* renderer))
     
 (let ((coords (make-array 6 :element-type
 			  '(signed-byte 32))))
@@ -106,13 +109,24 @@ the sdl2:with-init code."
     (sdl2:render-draw-line 
      renderer
      (aref coords 4) (aref coords 5)
-     (aref coords 0) (aref coords 1))
-    (draw-axes renderer)))
+     (aref coords 0) (aref coords 1))))
 		
 (defun rotate ()
   (setf *rotmat* 
 	(axis-rotate (sb-cga:vec 0.0 0.0 1.0)
 		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))
+
+(defun render-stuff (renderer)
+  (sdl2:set-render-draw-color renderer 0 0 0 255)
+  (sdl2:render-clear renderer)
+  (rotate)
+  (draw-axes renderer)
+  (sdl2:set-render-draw-color renderer 255 255 255 255)
+  (draw-triangle *tri-verts* renderer)
+  (when *model*
+    (sdl2:set-render-draw-color renderer 207 205 155 255)
+    (draw-mesh *model* renderer))
+  (sdl2:render-present renderer))
 
 (defun main ()
   (with-main
@@ -121,7 +135,9 @@ the sdl2:with-init code."
 	   (sb-cga:normalize
 	    (sb-cga:vec 0.0 1.0 1.0))
 	   (sb-cga:vec 0.0 0.0 0.0)
-	   (sb-cga:vec 1.0 0.0 0.0)))
+	   (sb-cga:vec 1.0 0.0 0.0))
+
+	  *model* (load-model "ship"))
     (sdl2:with-init (:everything)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
@@ -132,14 +148,7 @@ the sdl2:with-init code."
 	     ()
 	     (sleep (/ 1.0 60))
 	     (continuable
-	       (sdl2:set-render-draw-color renderer 0 0 0 255)
-	       (sdl2:render-clear renderer)
-	       (rotate)
-	       (sdl2:set-render-draw-color renderer
-					   255 255 255 255)
-	       (draw-triangle *tri-verts* renderer)
-	       (sdl2:render-present renderer)
-	       )
+	       (render-stuff renderer))
 	     #+SWANK (update-swank))
 	    (:quit () t)))))))
 
