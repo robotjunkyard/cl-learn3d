@@ -22,3 +22,32 @@
                                     `((member ,temp ',keys :test ,pred)
                                       ,@clause-forms)))))
                        clauses)))))
+
+(defun quicksort (arr lo hi &key (test #'<))
+  "Sorts the integer elements of the array.  This is an in-place sort, thus alters the original contents of the passed array."
+  (declare (type (simple-array * (*)) arr)
+	   (type uint32 lo hi)
+	   (type function test))
+  (flet ((%partition (arr lo hi)
+	   (declare (type (simple-array * (*)) arr)
+		    (type uint32 lo hi))
+	   (let ((pivot (svref arr lo))
+		 (i (1- lo))
+		 (j (1+ hi)))
+	     (declare (type int32 pivot i j))
+	     (loop do
+		  (loop do
+		       (incf i)
+		     while (< (the fixnum (svref arr i)) pivot))
+		  (loop do
+		       (decf j)
+		     while (> (the fixnum (svref arr j)) pivot))  
+		  (when (>= i j)
+		    (return-from %partition j))
+		  (rotatef (svref arr i) (svref arr j))))))
+    (when (funcall test lo hi)
+      (let ((p (%partition arr lo hi)))
+	(quicksort arr lo p)
+	(quicksort arr (1+ p) hi))))
+  arr)
+

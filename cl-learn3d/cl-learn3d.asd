@@ -12,5 +12,6 @@
 	       (:file "eztypes")
 	       (:file "misc")
 	       (:file "camera")
+	       (:file "draw")
 	       (:file "model")
                (:file "cl-learn3d")))

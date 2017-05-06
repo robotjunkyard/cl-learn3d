@@ -6,6 +6,10 @@
 ;; V = View
 ;; P = Projection
 
+(defvar *camera-eye* (sb-cga:vec 0.0 0.0 0.0)
+  "For LOOK-AT to memorize the camera's position for the rest of the program to query if needed.")
+(defvar *camera-target* (sb-cga:vec 0.0 0.0 0.0))
+
 (defun look-at (eye target up)
   "Returns a View matrix."
   (declare (type sb-cga:vec eye target up))
@@ -21,6 +25,9 @@
 		       (aref vx 1)  (aref vy 1)  (aref vz 1)  0.0
 		       (aref vx 2)  (aref vy 2)  (aref vz 2)  0.0
 		       dotxi-       dotyi-       dotzi-       1.0)))
+    (setf (aref *camera-eye* 0) (aref eye 0)
+	  (aref *camera-eye* 1) (aref eye 1)
+	  (aref *camera-eye* 2) (aref eye 2))
     ivm))
 
 (defun ortho-projection (width height near far)
