@@ -70,11 +70,13 @@
       ;; vertices now sorted
       ;; now check error conditions to prevent / by 0
       ;; now fill top sub-triangle
-      (let ((d0 (/ (float midx-topx) midy-topy))
-	    (d1 (/ (float btmx-topx) btmy-topy))
-	    (d2 (/ (float btmx-midx) btmy-midy))
+      (let ((dlong (/ (float btmx-topx) btmy-topy))
+	    (dupper (/ (float midx-topx) midy-topy))
+	    (dlower (/ (float btmx-midx) btmy-midy))
 	    (sx0 (float topx))
 	    (sx1 (float topx)))
+	(when print-stats
+	  (format t "  D[~6a, ~6a, ~6a]~%" dlong dupper dlower))
 	(tagbody
 	   (when (zerop midy-topy)
 	     (when print-stats
@@ -82,22 +84,22 @@
 	     (go DRAW-LOWER-TRIANGLE))
 	   DRAW-UPPER-TRIANGLE
 	   (loop
-	      for y from topy to midy
+	      for y from topy below midy
 	      do
-		(sdl2:render-draw-line renderer (truncate sx0) (truncate y) (truncate sx1) (truncate y))
-		(incf sx0 d0)
-		(incf sx1 d1))
+		(sdl2:render-draw-line renderer (truncate sx0) y (truncate sx1) y)
+		(incf sx0 dupper)
+		(incf sx1 dlong))
 	   (when (zerop btmy-midy)
 	     (when print-stats
 	       (format t " Skip Lower~%"))
 	     (return-from draw-2d-filled-triangle nil))
 	   DRAW-LOWER-TRIANGLE
 	   (loop
-	      for y from midy to btmy
+	      for y from midy below btmy
 	      do
-		(sdl2:render-draw-line renderer (truncate sx0) (truncate y) (truncate sx1) (truncate y))
-		(incf sx0 d2)
-		(incf sx1 d1))))))
+		(sdl2:render-draw-line renderer (truncate sx0) y (truncate sx1) y)
+		(incf sx0 dlower)
+		(incf sx1 dlong))))))
   (sdl2:set-render-draw-color renderer 255 255 255 255)
   (progn
     (sdl2:render-draw-line 

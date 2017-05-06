@@ -79,7 +79,7 @@ the sdl2:with-init code."
 	  (draw-2d-filled-triangle 
 	   x1 y1 x2 y2 x3 y3
 	   renderer
-	   :PRINT-STATS nil)))
+	   :PRINT-STATS t)))
       (progn
 	(let ((x1 (random *x-res*))
 	      (x2 (random *x-res*))
