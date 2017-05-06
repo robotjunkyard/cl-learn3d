@@ -63,10 +63,21 @@ the sdl2:with-init code."
   (sdl2:set-render-draw-color renderer 0 0 0 255)
   (sdl2:render-clear renderer)
   (rotate)
-  (draw-axes renderer)
-  (sdl2:set-render-draw-color renderer 255 255 255 255)
-  (draw-triangle *tri-verts* renderer)
+  (sdl2:set-render-draw-color renderer 64 127 255 255)
+  (let* ((tick (sdl2:get-ticks))    ;; fix later
+	 (rx (truncate (* 30.0 (sin (* 0.005 tick)))))
+	 (ry (truncate (* 30.0 (cos (* 0.005 tick))))))
+    (draw-2d-filled-triangle (- (truncate *x-res* 2) rx)
+			     (+ ry 30)
+			     
+			     (+ rx 30)
+			     (+ ry (- *y-res* 60))
+			     
+			     (+ rx (- *x-res* 60))
+			     (+ ry (- *y-res* 100))
+			     renderer))
   (when *model*
+    (draw-axes renderer)
     (sdl2:set-render-draw-color renderer 207 205 155 255)
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))

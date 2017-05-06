@@ -21,7 +21,68 @@
   (draw-line 0.0 0.0 0.0 0.0 *axis-size* 0.0 renderer)
   (sdl2:set-render-draw-color renderer 0 0 255 255)
   (draw-line 0.0 0.0 0.0 0.0 0.0 *axis-size* renderer))
-    
+
+(defun draw-2d-filled-triangle (x1 y1 x2 y2 x3 y3 renderer &key (print-stats nil))
+  (declare (type fixnum x1 y1 x2 y2 x3 y3)
+	   (type boolean print-stats))
+  ;; this will be drawing li
+  (let ((topx x1) (topy y1)
+	(midx x2) (midy y2)
+	(btmx x3) (btmy y3))
+    (declare (type fixnum topx topy midx midy btmx btmy))
+    ;; first sort the vertices
+    (when (> topy midy)
+      (rotatef topx midx)
+      (rotatef topy midy))
+    (when (> topy btmy)
+      (rotatef topx btmx)
+      (rotatef topy btmy))
+    (when (> midy btmy)
+      (rotatef midx btmx)
+      (rotatef midy btmy))  
+    (when print-stats
+      (format t "In: [~3d,~3d]        Sorted: [~3d,~3d]~%" x1 y1   topx topy)
+      (format t "    [~3d,~3d]                [~3d,~3d]~%" x2 y2   midx midy)
+      (format t "    [~3d,~3d]                [~3d,~3d]~%" x3 y3   btmx btmy))
+    (let ((midx-topx (- midx topx))
+	  (btmx-topx (- btmx topx))
+	  (btmx-midx (- btmx midx))
+	  (midy-topy (- midy topy))
+	  (btmy-topy (- btmy topy))
+	  (btmy-midy (- btmy midy)))
+      (declare (type fixnum midx-topx btmx-topx btmx-midx midy-topy btmy-topy btmy-midy))
+      (when (zerop btmy-topy)
+	(return-from draw-2d-filled-triangle nil))
+      ;; vertices now sorted
+      ;; now check error conditions to prevent / by 0
+      ;; now fill top sub-triangle
+      (let ((d0 (/ (float midx-topx) midy-topy))
+	    (d1 (/ (float btmx-topx) btmy-topy))
+	    (d2 (/ (float btmx-midx) btmy-midy))
+	    (sx0 (float topx))
+	    (sx1 (float topx)))
+	(tagbody
+	   (when (zerop midy-topy)
+	     (go DRAW-LOWER-TRIANGLE))
+	   DRAW-UPPER-TRIANGLE
+	   (loop
+	      for y from topy to midy
+	      do
+		(sdl2:render-draw-line renderer (truncate sx0) (truncate y) (truncate sx1) (truncate y))
+		(incf sx0 d0)
+		(incf sx1 d1))
+	   (when (zerop btmy-midy)
+	     (return-from draw-2d-filled-triangle nil))
+	   DRAW-LOWER-TRIANGLE
+	   (loop
+	      for y from midy to btmy
+	      do
+		(sdl2:render-draw-line renderer (truncate sx0) (truncate y) (truncate sx1) (truncate y))
+		(incf sx0 d2)
+		(incf sx1 d1)))))))
+  
+  
+  
 (let ((coords (make-array 6 :element-type
 			  '(signed-byte 32))))
   (defun draw-triangle (tri renderer)
