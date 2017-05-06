@@ -3,7 +3,7 @@
 (in-package #:cl-learn3d)
 
 (defparameter *model* nil)
-(defparameter *delay* 90.0)
+(defparameter *delay* 60.0)
 (defparameter *font* nil)
 
 (defmacro with-main (&body body)
@@ -71,6 +71,8 @@ the sdl2:with-init code."
   (sdl2:render-clear renderer)
   (rotate)
   (sdl2:set-render-draw-color renderer 64 127 255 255)
+
+  #|
   (if *show-dbg-tris*
       (progn
 	(setq *show-dbg-i* (mod (1+ *show-dbg-i*) (length *show-dbg-tris*)))
@@ -91,14 +93,14 @@ the sdl2:with-init code."
 	   x1 y1 x2 y2 x3 y3
 	   renderer
 	   :PRINT-STATS nil)
-	  ;; (format t "~d~%" (length *debug-tris*))
+	  (format t "~d~%" (length *debug-tris*))
 	  (unless *show-dbg-tris*
-	    (vector-push-extend (make-dbgvert :x1 x1 :y1 y1 :x2 x2 :y2 y2 :x3 x3 :y3 y3) *debug-tris*)))))
+	    (vector-push-extend (make-dbgvert :x1 x1 :y1 y1 :x2 x2 :y2 y2 :x3 x3 :y3 y3) *debug-tris*)))))|#
 
-  #|(when *model*
+  (when *model*
     (draw-axes renderer)
     (sdl2:set-render-draw-color renderer 207 205 155 255)
-    (draw-mesh *model* renderer))|#
+    (draw-mesh *model* renderer))
   (sdl2:render-present renderer))
 
 (defun main ()

@@ -22,21 +22,22 @@
   (sdl2:set-render-draw-color renderer 0 0 255 255)
   (draw-line 0.0 0.0 0.0 0.0 0.0 *axis-size* renderer))
 
-(defun draw-2d-filled-triangle (x1 y1 x2 y2 x3 y3 renderer &key (print-stats nil))
+(defun draw-2d-filled-triangle (x1 y1 x2 y2 x3 y3 renderer &key (print-stats nil) (draw-debug nil))
   (declare (type fixnum x1 y1 x2 y2 x3 y3)
-	   (type boolean print-stats))
+	   (type boolean print-stats draw-debug))
   ;; this will be drawing li
-  (let ((rect (sdl2:make-rect (- x1 3) (- y1 3) 6 6)))
-    (sdl2:set-render-draw-color renderer 255 0 0 255)
-    (sdl2:render-fill-rect renderer rect)
-    (setf (sdl2:rect-x rect) (- x2 3)
-	  (sdl2:rect-y rect) (- y2 3))
-        (sdl2:set-render-draw-color renderer 0 255 0 255)
-    (sdl2:render-fill-rect renderer rect)
-        (setf (sdl2:rect-x rect) (- x3 3)
-	      (sdl2:rect-y rect) (- y3 3))
-	(sdl2:set-render-draw-color renderer 0 128 255 255)
-    (sdl2:render-fill-rect renderer rect))
+  (when draw-debug
+    (let ((rect (sdl2:make-rect (- x1 3) (- y1 3) 6 6)))
+      (sdl2:set-render-draw-color renderer 255 0 0 255)
+      (sdl2:render-fill-rect renderer rect)
+      (setf (sdl2:rect-x rect) (- x2 3)
+	    (sdl2:rect-y rect) (- y2 3))
+      (sdl2:set-render-draw-color renderer 0 255 0 255)
+      (sdl2:render-fill-rect renderer rect)
+      (setf (sdl2:rect-x rect) (- x3 3)
+	    (sdl2:rect-y rect) (- y3 3))
+      (sdl2:set-render-draw-color renderer 0 128 255 255)
+      (sdl2:render-fill-rect renderer rect)))
   (let ((topx x1) (topy y1)
 	(midx x2) (midy y2)
 	(btmx x3) (btmy y3))
@@ -79,6 +80,7 @@
 	  (format t "  D[~6a, ~6a, ~6a]~%" dlong dupper dlower))
 	(tagbody
 	   (when (zerop midy-topy)
+	     (setq sx0 midx)
 	     (when print-stats
 	       (format t " Skip Upper~%"))
 	     (go DRAW-LOWER-TRIANGLE))
@@ -92,22 +94,21 @@
 	   (when (zerop btmy-midy)
 	     (when print-stats
 	       (format t " Skip Lower~%"))
-	     (return-from draw-2d-filled-triangle nil))
+	     (go DRAW-WIREFRAME))
 	   DRAW-LOWER-TRIANGLE
 	   (loop
 	      for y from midy below btmy
 	      do
 		(sdl2:render-draw-line renderer (truncate sx0) y (truncate sx1) y)
 		(incf sx0 dlower)
-		(incf sx1 dlong))))))
-  (sdl2:set-render-draw-color renderer 255 255 255 255)
-  (progn
-    (sdl2:render-draw-line 
-     renderer x1 y1 x2 y2)
-    (sdl2:render-draw-line 
-     renderer x2 y2 x3 y3)
-    (sdl2:render-draw-line 
-     renderer x3 y3 x1 y1))
+		(incf sx1 dlong))
+	 DRAW-WIREFRAME
+	   (when draw-debug
+	     (sdl2:set-render-draw-color renderer 255 255 255 255)
+	     (sdl2:render-draw-line renderer x1 y1 x2 y2)
+	     (sdl2:render-draw-line renderer x2 y2 x3 y3)
+	     (sdl2:render-draw-line renderer x3 y3 x1 y1))
+	   ))))
   nil)
   
   
@@ -131,6 +132,7 @@
 			     (aref coords 2) (aref coords 3)
 			     (aref coords 4) (aref coords 5)
 			     renderer)
+    #|
     (sdl2:set-render-draw-color renderer 255 255 255 255)
     (progn
       (sdl2:render-draw-line 
@@ -144,5 +146,6 @@
       (sdl2:render-draw-line 
        renderer
        (aref coords 4) (aref coords 5)
-       (aref coords 0) (aref coords 1)))))
+       (aref coords 0) (aref coords 1)))|#(
+    )))
 
