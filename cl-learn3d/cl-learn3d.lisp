@@ -34,21 +34,14 @@ the sdl2:with-init code."
             (when connection
               (swank::handle-requests connection t)))))
 
-(defparameter *tri-verts* 
-  (make-array 3 :initial-contents
-	      (list
-	       (sb-cga:vec -4.0  -4.0  0.0)
-	       (sb-cga:vec  4.0  -4.0  0.0)
-	       (sb-cga:vec  0.0   4.0  0.0))))
-
 (defparameter *vmat*
   (look-at (sb-cga:normalize (sb-cga:vec 0.0 1.0 1.0))
 	   (sb-cga:vec 0.0 0.0 0.0)
-	   (sb-cga:vec 1.0 0.0 0.0)))
+	   (sb-cga:vec 1.0 0.0 0.0))  "World's view matrix")
 (defparameter *pmat*
-  (ortho-projection 8.0 8.0 0.25 8.0))
+  (ortho-projection 8.0 8.0 0.25 8.0) "World's projection matrix")
 (defparameter *rotmat*
-  (sb-cga:identity-matrix))
+  (sb-cga:identity-matrix)            "World's rotation matrix")
 (defparameter *axis-size* 4.0)
 
 (defparameter *x-res* 640)
@@ -70,7 +63,7 @@ the sdl2:with-init code."
   (sdl2:set-render-draw-color renderer 64 127 255 255)
   (when *model*
     (draw-axes renderer)
-    (sort-mesh-face-draw-order *model*)
+    ;;;; (sort-mesh-face-draw-order *model*)
     (sdl2:set-render-draw-color renderer 207 205 155 255)
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))

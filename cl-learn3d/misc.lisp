@@ -28,24 +28,62 @@
   (declare (type (simple-array * (*)) arr)
 	   (type uint32 lo hi)
 	   (type function valuator))
-  (flet ((%partition (arr lo hi)
+  (flet ((%partition (arr p r)
 	   (declare (type (simple-array * (*)) arr)
-		    (type uint32 lo hi))
-	   (let ((pivot (funcall valuator (aref arr lo)))
-		 (i (1- lo))
-		 (j (1+ hi)))
-	     (declare (type number pivot)
-		      (type int32 i j))
+		    (type uint32 p r))
+	   (let ((x (funcall valuator (aref arr p)))
+		 (i (1- p))
+		 (j (1+ r)))
 	     (loop do
 		  (loop do
+		       (decf j)
+		     until (<= (funcall valuator (aref arr j)) x))
+		  (loop do
 		       (incf i)
-		     while (< (funcall valuator (aref arr i)) pivot))
+		     until (>= (funcall valuator (aref arr i)) x))
+		  (if (< i j)
+		      (rotatef (aref arr i) (aref arr j))
+		      (return-from %partition j))))))
+    (when (< lo hi)
+      (let ((p (%partition arr lo hi)))
+	(quicksort arr lo p :valuator valuator)
+	(quicksort arr (1+ p) hi :valuator valuator))))
+  arr)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defun quicksort-* (arr lo hi &key (valuator #'identity))
+  (declare (type (simple-array * (*)) arr)
+	   (type fixnum lo hi)
+	   (type function valuator))
+  (flet ((%partition (arr p r)
+	   (declare (type (simple-array * (*)) arr)
+		    (type fixnum p r))
+	   (let ((x (funcall valuator (aref arr p)))
+		 (i (1- p))
+		 (j (1+ r)))
+	     (loop do
 		  (loop do
 		       (decf j)
-		     while (> (funcall valuator (aref arr j)) pivot))  
-		  (when (>= i j)
-		    (return-from %partition j))
-		  (rotatef (aref arr i) (aref arr j))))))
+		     until (<= (funcall valuator (aref arr j)) x))
+		  (loop do
+		       (incf i)
+		     until (>= (funcall valuator (aref arr i)) x))
+		  (if (< i j)
+		      (rotatef (aref arr i) (aref arr j))
+		      (return-from %partition j))))))
     (when (< lo hi)
       (let ((p (%partition arr lo hi)))
 	(quicksort arr lo p)
