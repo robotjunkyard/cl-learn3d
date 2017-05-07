@@ -140,17 +140,15 @@
 
 (defun draw-mesh (mesh renderer)
   (declare (type mesh mesh))
-  (sort-mesh-face-draw-order mesh)
+  (sort-mesh-face-draw-order mesh *world-matrix*)
   (loop
      for face# across (mesh-face-draw-order mesh)
      ;; for fc of-type uint32 from 0 do
      do
        ;;; (format t "~d, " face#)
        (multiple-value-bind (x1 y1 z1 x2 y2 z2 x3 y3 z3)
-	   (mesh-face-coords-* mesh face#)   ;; (aref (mesh-faces mesh) face#))
-	 (draw-3d-triangle-* x1 y1 z1 x2 y2 z2 x3 y3 z3 renderer)))
-  ;;; (format t "~%~%")
-  )
+	   (mesh-face-coords-* mesh face#)
+	 (draw-3d-triangle-* x1 y1 z1 x2 y2 z2 x3 y3 z3 *world-matrix* renderer))))
 
 (defun dist-points-nosqrt (x1 y1 z1 x2 y2 z2)
   (declare (type single-float x1 y1 z1 x2 y2 z2))
@@ -158,26 +156,29 @@
   (let ((result (+ (expt (- x1 x2) 2)
 		   (expt (- y1 y2) 2)
 		   (expt (- z1 z2) 2))))
-    ;;; (format t "dist ~a~%" result)
+    (declare (type single-float result))
     result))
 
-(defun tri-sort-valuator (mesh face#)
+(defun tri-sort-valuator (mesh face# tmat)
   "Returns distance between model (after local&world transforms) and the camera's origin."
   (declare (type mesh mesh)
-	   (type uint32 face#))
+	   (type uint32 face#)
+	   (type (simple-array single-float (16)))
+	   (optimize (speed 3) (safety 0)))
   (let ((cx (aref *camera-eye* 0))
 	(cy (aref *camera-eye* 1))
 	(cz (aref *camera-eye* 2)))
+    (declare (type single-float cx cy cz))
     (multiple-value-bind (fx1 fy1 fz1 fx2 fy2 fz2 fx3 fy3 fz3)
 	(mesh-face-coords-* mesh face#)
-      (let* ((tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
-	     (tcp  (sb-cga:transform-point (sb-cga:vec (+ cx) (+ cy) (+ cz)) tmat))
-		    ;;; (tcp  (sb-cga:vec cx cy cz))
-	     
-	     (tfp1  (sb-cga:transform-point (sb-cga:vec fx1 fy1 fz1) tmat))
-	     (tfp2  (sb-cga:transform-point (sb-cga:vec fx2 fy2 fz2) tmat))
-	     (tfp3  (sb-cga:transform-point (sb-cga:vec fx3 fy3 fz3) tmat))
-	     
+      (declare (type single-float fx1 fy1 fz1 fx2 fy2 fz2 fx3 fy3 fz3))
+      (let* (;; yeah I guess the camera eye is supposed to be transformed too...
+	     ;; since results are visually less "mistakey" this way than with just
+	     ;; the unaltered coordinates.  gonna have to hit the books to be certain...
+	     (tcp  (sb-cga:transform-point (sb-cga:vec (+ cx) (+ cy) (+ cz)) tmat))    
+	     (tfp1 (sb-cga:transform-point (sb-cga:vec fx1 fy1 fz1) tmat))
+	     (tfp2 (sb-cga:transform-point (sb-cga:vec fx2 fy2 fz2) tmat))
+	     (tfp3 (sb-cga:transform-point (sb-cga:vec fx3 fy3 fz3) tmat))
 	     (tfx1 (aref tfp1 0))
 	     (tfy1 (aref tfp1 1))
 	     (tfz1 (aref tfp1 2))
@@ -187,22 +188,19 @@
 	     (tfx3 (aref tfp3 0))
 	     (tfy3 (aref tfp3 1))
 	     (tfz3 (aref tfp3 2))
-	     #|(dist (- (dist-points-nosqrt (aref tcp 0)
-	     (aref tcp 1)
-	     (aref tcp 2)
-	     (/ (+ tfx1 tfx2 tfx3) 3.0)
-	     (/ (+ tfy1 tfy2 tfy3) 3.0)
-	     (/ (+ tfz1 tfz2 tfz3) 3.0))))|#
-	     (squeeze -3.0)
-	     (dist (dist-points-nosqrt (aref tcp 0)
-				       (aref tcp 1)
-				       (aref tcp 2)
-				       (/ (min tfx1 tfx2 tfx3) squeeze)
-				       (/ (min tfy1 tfy2 tfy3) squeeze)
-				       (/ (min tfz1 tfz2 tfz3) squeeze))))
-	dist))))
+	     (squeeze -4.0)  #| smells kludgey |# ) 
+	(declare (type (simple-array single-float (16)) tmat)
+		 (type (simple-array single-float (3)) tcp tfp1 tfp2 tfp3)
+		 (type single-float tfx1 tfy1 tfz1 tfx2 tfy2 tfz2 tfx3 tfy3 tfz3 squeeze)
+		 (dynamic-extent tcp tfp1 tfp2 tfp3))
+	(dist-points-nosqrt (aref tcp 0)
+			    (aref tcp 1)
+			    (aref tcp 2)
+			    (/ (min tfx1 tfx2 tfx3) squeeze)
+			    (/ (min tfy1 tfy2 tfy3) squeeze)
+			    (/ (min tfz1 tfz2 tfz3) squeeze))))))
 
-(defun sort-mesh-face-draw-order (mesh)
+(defun sort-mesh-face-draw-order (mesh tmat)
   "In-place sorts the FACE-DRAW-ORDER array of a given mesh object given a transformation matrix 'TMATRIX' and vector 'CAMERA-ORIGIN'"
   (declare (type mesh mesh))
   (flet
@@ -211,7 +209,7 @@
 		  0 (1- (length (mesh-face-draw-order mesh)))
 		  :valuator #'(lambda (face#)
 				(declare (type uint32 face#))
-				(tri-sort-valuator mesh face#)))))
+				(tri-sort-valuator mesh face# tmat)))))
 
 (defun transform-model (mesh mat)
   "Update a model's vertexdata-* field to be the transformed version of its static vertex data, given the passed matrix."

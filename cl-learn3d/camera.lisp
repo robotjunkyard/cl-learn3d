@@ -9,6 +9,7 @@
 (defvar *camera-eye* (sb-cga:vec 0.0 0.0 0.0)
   "For LOOK-AT to memorize the camera's position for the rest of the program to query if needed.")
 (defvar *camera-target* (sb-cga:vec 0.0 0.0 0.0))
+(declaim (type (simple-array single-float (3)) *camera-eye* *camera-target*))
 
 (defun look-at (eye target up)
   "Returns a View matrix."

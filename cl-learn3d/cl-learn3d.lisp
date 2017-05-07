@@ -5,7 +5,6 @@
 (defparameter *model* nil)
 (defparameter *delay* 1.0)
 (defparameter *font* nil)
-
 (defparameter *draw-frame* 0)
 
 (defmacro with-main (&body body)
@@ -42,10 +41,14 @@ the sdl2:with-init code."
   (ortho-projection 8.0 8.0 0.25 8.0) "World's projection matrix")
 (defparameter *rotmat*
   (sb-cga:identity-matrix)            "World's rotation matrix")
+(defparameter *world-matrix*
+  (sb-cga:identity-matrix))
+(declaim (type (simple-array single-float (16)) *vmat* *pmat* *rotmat* *world-matrix*))
 (defparameter *axis-size* 4.0)
 
 (defparameter *x-res* 640)
 (defparameter *y-res* 480)
+(declaim (type uint16 *x-res* *y-res*))
 (defun setres (x y)
   (setf *x-res* x
 	*y-res* y))
@@ -57,6 +60,7 @@ the sdl2:with-init code."
 )
 
 (defun render-stuff (renderer)
+  (setq *world-matrix* (sb-cga:matrix* *pmat* *vmat* *rotmat*))
   (sdl2:set-render-draw-color renderer 0 0 0 255)
   (sdl2:render-clear renderer)
   (rotate)

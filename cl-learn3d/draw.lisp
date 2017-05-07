@@ -3,27 +3,30 @@
 (defparameter *default-triangle-color*
   (make-colori :r 128 :g 160 :b 160))
 
-(defun draw-line (x1 y1 z1 x2 y2 z2 renderer)
+(defun draw-3d-line (x1 y1 z1 x2 y2 z2 tmat renderer)
+  (declare (type single-float x1 y1 z1 x2 y2 z2)
+	   (type (simple-array single-float (16)) tmat))
   (let* ((p1 (sb-cga:vec x1 y1 z1))
 	 (p2 (sb-cga:vec x2 y2 z2))
-	 (tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
 	 (tp1 (sb-cga:transform-point p1 tmat))
 	 (tp2 (sb-cga:transform-point p2 tmat))
 	 (sx1 (round (* (/ (1+ (aref tp1 0)) 2.0) *x-res*)))
 	 (sy1 (round (* (/ (- 1 (aref tp1 1)) 2.0) *y-res*)))
 	 (sx2 (round (* (/ (1+ (aref tp2 0)) 2.0) *x-res*)))
 	 (sy2 (round (* (/ (- 1 (aref tp2 1)) 2.0) *y-res*))))
+    (declare (type (simple-array single-float (3)) p1 p2 tp1 tp2)
+	     (type int32 sx1 sy1 sx2 sy2))
     (sdl2:render-draw-line 
      renderer
      sx1 sy1 sx2 sy2)))
 
 (defun draw-axes (renderer)
   (sdl2:set-render-draw-color renderer 255 0 0 255)
-  (draw-line 0.0 0.0 0.0 *axis-size* 0.0 0.0 renderer)
+  (draw-3d-line 0.0 0.0 0.0 *axis-size* 0.0 0.0 *world-matrix* renderer)
   (sdl2:set-render-draw-color renderer 0 255 0 255)
-  (draw-line 0.0 0.0 0.0 0.0 *axis-size* 0.0 renderer)
+  (draw-3d-line 0.0 0.0 0.0 0.0 *axis-size* 0.0 *world-matrix* renderer)
   (sdl2:set-render-draw-color renderer 0 0 255 255)
-  (draw-line 0.0 0.0 0.0 0.0 0.0 *axis-size* renderer))
+  (draw-3d-line 0.0 0.0 0.0 0.0 0.0 *axis-size* *world-matrix* renderer))
 
 (defun draw-2d-filled-triangle (x1 y1 x2 y2 x3 y3 renderer
 				&key (print-stats nil) (draw-debug nil)
@@ -145,23 +148,27 @@
 			       renderer
 			       :wireframe t :fill t)))|#
 
-(defun draw-3d-triangle-* (x1 y1 z1 x2 y2 z2 x3 y3 z3
+(defun draw-3d-triangle-* (x1 y1 z1 x2 y2 z2 x3 y3 z3 tmat
 			   renderer &key (fill t) (wireframe t)
 				      (color *default-triangle-color*))
   (declare (type single-float x1 y1 x2 y2 x3 y3)
+	   (type (simple-array single-float (16)) tmat)
 	   (type boolean fill wireframe)
 	   (type colori color))
-  (let* ((tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
-	 (tv1 (sb-cga:transform-point (sb-cga:vec x1 y1 z1) tmat))
+  (let* ((tv1 (sb-cga:transform-point (sb-cga:vec x1 y1 z1) tmat))
 	 (tv2 (sb-cga:transform-point (sb-cga:vec x2 y2 z2) tmat))
 	 (tv3 (sb-cga:transform-point (sb-cga:vec x3 y3 z3) tmat))
+	 
+	 ;; project 'em to 2D screen coordinates
 	 (tx1 (* (/ (1+ (aref tv1 0)) 2.0) *x-res*))
 	 (ty1 (* (/ (- 1 (aref tv1 1)) 2.0) *y-res*))
 	 (tx2 (* (/ (1+ (aref tv2 0)) 2.0) *x-res*))
 	 (ty2 (* (/ (- 1 (aref tv2 1)) 2.0) *y-res*))
 	 (tx3 (* (/ (1+ (aref tv3 0)) 2.0) *x-res*))
 	 (ty3 (* (/ (- 1 (aref tv3 1)) 2.0) *y-res*)))
-    ;;;; (sdl2:set-render-draw-color renderer 207 205 155 255)
+    (declare (type (simple-array single-float (3)) tv1 tv2 tv3)
+	     (type single-float tx1 ty1 tx2 ty2 tx3 ty3))
+
     (sdl2:set-render-draw-color renderer (colori-r color)
 				(colori-g color) (colori-b color)
 				(colori-a color))
