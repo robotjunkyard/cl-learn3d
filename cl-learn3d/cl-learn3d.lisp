@@ -3,8 +3,10 @@
 (in-package #:cl-learn3d)
 
 (defparameter *model* nil)
-(defparameter *delay* 60.0)
+(defparameter *delay* 1.0)
 (defparameter *font* nil)
+
+(defparameter *draw-frame* 0)
 
 (defmacro with-main (&body body)
   "Enables REPL access via UPDATE-SWANK in the main loop using SDL2. Wrap this around
@@ -54,51 +56,21 @@ the sdl2:with-init code."
 (defun setres (x y)
   (setf *x-res* x
 	*y-res* y))
-
 		
 (defun rotate ()
   (setf *rotmat* 
-	(axis-rotate (sb-cga:vec 0.0 0.0 1.0)
-		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))
+	(axis-rotate (sb-cga:normalize (sb-cga:vec 1.0 0.0 0.0))
+		     (mod (* 0.001 (sdl2:get-ticks)) 360.0)))
+)
 
-(defstruct dbgvert
-  x1 y1 x2 y2 x3 y3)
-(defparameter *debug-tris* (make-array 4096 :adjustable t :fill-pointer 0))
-(defparameter *show-dbg-tris* nil)
-(defparameter *show-dbg-i* 0)
 (defun render-stuff (renderer)
   (sdl2:set-render-draw-color renderer 0 0 0 255)
   (sdl2:render-clear renderer)
   (rotate)
   (sdl2:set-render-draw-color renderer 64 127 255 255)
-
-  #|
-  (if *show-dbg-tris*
-      (progn
-	(setq *show-dbg-i* (mod (1+ *show-dbg-i*) (length *show-dbg-tris*)))
-	(with-slots (x1 y1 x2 y2 x3 y3)
-	    (aref *show-dbg-tris* *show-dbg-i*)
-	  (draw-2d-filled-triangle 
-	   x1 y1 x2 y2 x3 y3
-	   renderer
-	   :PRINT-STATS t)))
-      (progn
-	(let ((x1 (random *x-res*))
-	      (x2 (random *x-res*))
-	      (x3 (random *x-res*))
-	      (y1 (random *y-res*))
-	      (y2 (random *y-res*))
-	      (y3 (random *y-res*)))
-	  (draw-2d-filled-triangle 
-	   x1 y1 x2 y2 x3 y3
-	   renderer
-	   :PRINT-STATS nil)
-	  (format t "~d~%" (length *debug-tris*))
-	  (unless *show-dbg-tris*
-	    (vector-push-extend (make-dbgvert :x1 x1 :y1 y1 :x2 x2 :y2 y2 :x3 x3 :y3 y3) *debug-tris*)))))|#
-
   (when *model*
     (draw-axes renderer)
+    (sort-mesh-face-draw-order *model*)
     (sdl2:set-render-draw-color renderer 207 205 155 255)
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))
@@ -112,7 +84,7 @@ the sdl2:with-init code."
 	   (sb-cga:vec 0.0 0.0 0.0)
 	   (sb-cga:vec 1.0 0.0 0.0))
 
-	  *model* (load-model "ship"))
+	  *model* (load-model "ico"))
     (sdl2:with-init (:everything)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
@@ -122,7 +94,9 @@ the sdl2:with-init code."
 	     ()
 	     (sleep (/ *delay* 60))
 	     (continuable
-	       (render-stuff renderer))
+	       ;;; (format t " ------ ~8d ------ ~%" *draw-frame*)
+	       (render-stuff renderer)
+	       (incf *draw-frame*))
 	     #+SWANK (update-swank))
 	    (:quit ()
 		   t)))))))

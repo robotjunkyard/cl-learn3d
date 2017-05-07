@@ -10,7 +10,15 @@
   (vertexdata (make-array 0 :element-type 'single-float :adjustable t :fill-pointer 0)
 	      :type (vector single-float))
   (faces (make-array 0 :element-type 'meshface :adjustable t :fill-pointer 0)
-	 :type (VECTOR T *)))
+	 :type (VECTOR T *))
+
+  ;;;;;;(tmat (sb-cga:identity-matrix) :type (simple-array single-float (16)))
+  ;; vertexdata-* is the "output" of transformation operations done from vertexdata
+  (vertexdata-* (make-array 0 :element-type 'single-float :adjustable t :fill-pointer 0)
+	       :type (vector single-float))
+  ;; used, and continuously clobbered per call, by sorted model draw function
+  (face-draw-order (make-array 0 :element-type 'uint32 :adjustable t :fill-pointer 0)
+		   :type (vector uint32)))
 
 (defun load-model (name)
   (declare (type string name))
@@ -49,25 +57,19 @@
 					:test #'equal)))
 			  (vector-push-extend
 			   (1- (read-from-string (first s)))
-			   (meshface-vertices face))
-			  (incf (the uint32 facecount))
-			  
-			  ;; (when (second s)
-			  ;;  (vector-push-extend
-			  ;;   (1- (read-from-string (second s)))
-			  ;;   (meshface-uv face)))
-			  ;; (when (third s)
-			  ;;  (vector-push-extend
-			  ;;   (1- (read-from-string (third s)))
-			  ;;   (meshface-normals face)))
-			  ))
+			   (meshface-vertices face))))
+		   (incf (the uint32 facecount))
 		   (vector-push-extend face faces)))
 	    ("s" nil)   ;; not 100% sure what this is.  ignoring it never caused problems
 	    )))
     (if (> (the uint32 (length vertexdata)) 0)
 	(let ((newmodel
 	       (make-mesh :vertexdata vertexdata
-			  :faces faces)))
+			  :vertexdata-* (copy-seq vertexdata)
+			  :faces faces
+			  :face-draw-order (make-array facecount :element-type 'uint32
+						       :initial-contents (loop for i below facecount collect i))
+			  )))
 	  (format t "Mesh loaded with ~d vertices and ~d faces.~%" vertexcount facecount)
 	  newmodel)
 	(progn (format t "Warning: 0 vertices loaded in load-model for file '~a', returning NIL!!"
@@ -101,35 +103,106 @@
 	(values (aref (mesh-vertexdata mesh) ar0i)
 		(aref (mesh-vertexdata mesh) (+ 1 ar0i))
 		(aref (mesh-vertexdata mesh) (+ 2 ar0i))
-		
 		(aref (mesh-vertexdata mesh) ar1i)
 		(aref (mesh-vertexdata mesh) (+ 1 ar1i))
 		(aref (mesh-vertexdata mesh) (+ 2 ar1i))
-		
 		(aref (mesh-vertexdata mesh) ar2i)
 		(aref (mesh-vertexdata mesh) (+ 1 ar2i))
 		(aref (mesh-vertexdata mesh) (+ 2 ar2i)))))))
 
-;; closure with a buffered triangle to plop the results for each triangle, to reduce consing
-(let ((%tri (make-array 3 :initial-contents
-	      (list
-	       (sb-cga:vec -1.0  -1.0  0.0)
-	       (sb-cga:vec  1.0  -1.0  0.0)
-	       (sb-cga:vec  0.0   1.0  0.0)))))
-  (defun draw-mesh (mesh renderer)
-    (declare (type mesh mesh))
-    (loop
-       for face# from 0 below (length (mesh-faces mesh))
-       for fc of-type uint32 from 0 do
-	 (multiple-value-bind (x1 y1 z1 x2 y2 z2 x3 y3 z3)
-	     (mesh-face-coords mesh face#)
-	   (setf (aref (aref %tri 0) 0) x1
-		 (aref (aref %tri 0) 1) y1
-		 (aref (aref %tri 0) 2) z1
-		 (aref (aref %tri 1) 0) x2
-		 (aref (aref %tri 1) 1) y2
-		 (aref (aref %tri 1) 2) z2
-		 (aref (aref %tri 2) 0) x3
-		 (aref (aref %tri 2) 1) y3
-		 (aref (aref %tri 2) 2) z3)
-	   (draw-3d-triangle %tri renderer)))))
+(defun mesh-face-coords-* (mesh face#)
+  "Returns a 9-value set of TRANSFORMED vertex coordinates (ergo: from vertexdata-*, not vertexdata) x1,y1,z1,x2,y2,z2,x3,y3,z3 of a requested face of a mesh."
+  (declare (type mesh mesh)
+	   (type uint32 face#))
+  (let ((meshface (aref (mesh-faces mesh) face#)))
+    (declare (type meshface meshface))
+    (let ((v0idx (aref (meshface-vertices meshface) 0))
+	  (v1idx (aref (meshface-vertices meshface) 1))
+	  (v2idx (aref (meshface-vertices meshface) 2)))
+      (declare (type uint32 v0idx v1idx v2idx))
+      (let ((ar0i (* v0idx 3))
+	    (ar1i (* v1idx 3))
+	    (ar2i (* v2idx 3)))
+	(declare (type uint32 ar0i ar1i ar2i))
+	(values (aref (mesh-vertexdata-* mesh) ar0i)
+		(aref (mesh-vertexdata-* mesh) (+ 1 ar0i))
+		(aref (mesh-vertexdata-* mesh) (+ 2 ar0i))
+		(aref (mesh-vertexdata-* mesh) ar1i)
+		(aref (mesh-vertexdata-* mesh) (+ 1 ar1i))
+		(aref (mesh-vertexdata-* mesh) (+ 2 ar1i))
+		(aref (mesh-vertexdata-* mesh) ar2i)
+		(aref (mesh-vertexdata-* mesh) (+ 1 ar2i))
+		(aref (mesh-vertexdata-* mesh) (+ 2 ar2i)))))))
+
+(defun draw-mesh (mesh renderer)
+  (declare (type mesh mesh))
+  ;; ;; (transform-model mesh (sb-cga:matrix* *vmat* *pmat* *rotmat* ))
+  (loop
+     for face# across (mesh-face-draw-order mesh)
+     for fc of-type uint32 from 0 do
+       (multiple-value-bind (x1 y1 z1 x2 y2 z2 x3 y3 z3)
+	   (mesh-face-coords-* mesh face#)   ;; (aref (mesh-faces mesh) face#))
+	 (draw-3d-triangle-* x1 y1 z1 x2 y2 z2 x3 y3 z3 renderer))))
+
+(defun dist-points-nosqrt (x1 y1 z1 x2 y2 z2)
+  (declare (type single-float x1 y1 z1 x2 y2 z2))
+  "Used strictly for comparisons; so square-root is not important."
+  (let ((result (+ (expt (- x1 x2) 2)
+		   (expt (- y1 y2) 2)
+		   (expt (- z1 z2) 2))))
+    ;;; (format t "dist ~a~%" result)
+    result))
+
+(defun sort-mesh-face-draw-order (mesh)
+  "In-place sorts the FACE-DRAW-ORDER array of a given mesh object given a transformation matrix 'TMATRIX' and vector 'CAMERA-ORIGIN'"
+  (declare (type mesh mesh))
+  ;; OPTIMIZATION TODO: memoize distances
+  (flet ((%valuator (face#)
+	   (declare (type uint32 face#))
+	   (let ((cx (aref *camera-eye* 0))
+		 (cy (aref *camera-eye* 1))
+		 (cz (aref *camera-eye* 2)))
+	     (multiple-value-bind (fx1 fy1 fz1 fx2 fy2 fz2 fx3 fy3 fz3)
+		 (mesh-face-coords-* mesh face#)
+	       (let* ((tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
+		      (tcp  (sb-cga:transform-point (sb-cga:vec cx cy cz) tmat))
+		      (tfp1 (sb-cga:transform-point (sb-cga:vec fx1 fy1 fz1) tmat))
+		      (tfp2 (sb-cga:transform-point (sb-cga:vec fx2 fy2 fz2) tmat))
+		      (tfp3 (sb-cga:transform-point (sb-cga:vec fx3 fy3 fz3) tmat))
+		      (tfx1 (aref tfp1 0))
+		      (tfy1 (aref tfp1 1))
+		      (tfz1 (aref tfp1 2))
+		      (tfx2 (aref tfp2 0))
+		      (tfy2 (aref tfp2 1))
+		      (tfz2 (aref tfp2 2))
+		      (tfx3 (aref tfp3 0))
+		      (tfy3 (aref tfp3 1))
+		      (tfz3 (aref tfp3 2))
+		      (dist (dist-points-nosqrt (aref tcp 0)
+						(aref tcp 1)
+						(aref tcp 2)
+						(/ (+ tfx1 tfx2 tfx3) 3.0)
+						(/ (+ tfy1 tfy2 tfy3) 3.0)
+						(/ (+ tfz1 tfz2 tfz3) 3.0))))
+		 ;; (format t "~d = ~a~%" face# dist)
+		 dist)))))
+    (quicksort (mesh-face-draw-order mesh)
+		 0 (1- (length (mesh-face-draw-order mesh)))
+		 :valuator #'%valuator)))
+
+(defun transform-model (mesh mat)
+  "Update a model's vertexdata-* field to be the transformed version of its static vertex data, given the passed matrix."
+  (declare (type mesh mesh)
+	   (type (simple-array single-float (16)) mat))
+  (loop
+     for vi of-type uint32 below (length (mesh-vertexdata mesh)) by 3
+     ;; this loop probably conses like a donkey... TODO: optimize this later, AFTER it works
+     for vert = (sb-cga:vec (aref (mesh-vertexdata mesh) vi)
+			    (aref (mesh-vertexdata mesh) (+ 1 vi))
+			    (aref (mesh-vertexdata mesh) (+ 2 vi)))
+     for tv   = (sb-cga:transform-point vert mat)
+     do
+       (setf (aref (mesh-vertexdata-* mesh) vi)       (aref tv 0)
+	     (aref (mesh-vertexdata-* mesh) (+ 1 vi)) (aref tv 1)
+	     (aref (mesh-vertexdata-* mesh) (+ 2 vi)) (aref tv 2)))
+  nil)       
