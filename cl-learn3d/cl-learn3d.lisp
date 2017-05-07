@@ -69,6 +69,7 @@ the sdl2:with-init code."
   (sdl2:render-present renderer))
 
 (defun main ()
+  (sb-ext:gc :full t)
   (with-main
     (setq *vmat*
 	  (look-at 

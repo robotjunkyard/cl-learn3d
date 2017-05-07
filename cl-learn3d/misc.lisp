@@ -23,70 +23,94 @@
                                       ,@clause-forms)))))
                        clauses)))))
 
-(defun quicksort (arr lo hi &key (valuator #'identity))
-  "Sorts the numeric elements of the array.  This is an in-place sort, thus alters the original contents of the passed array."
-  (declare (type (simple-array * (*)) arr)
+(defun quicksort-iv (arr lo hi &key (valuator #'identity))
+  "Sorts the numeric elements of the array.  This is an in-place sort, thus alters the original contents of the passed array.  This presumes the valuator returns an integer."
+  (declare (type (simple-array uint32 (*)) arr)
 	   (type uint32 lo hi)
 	   (type function valuator))
   (flet ((%partition (arr p r)
-	   (declare (type (simple-array * (*)) arr)
+	   (declare (type (simple-array uint32 (*)) arr)
 		    (type uint32 p r))
 	   (let ((x (funcall valuator (aref arr p)))
 		 (i (1- p))
 		 (j (1+ r)))
+	     (declare (type fixnum x)
+		      (type int32 i j))
 	     (loop do
 		  (loop do
 		       (decf j)
-		     until (<= (funcall valuator (aref arr j)) x))
+		     until (<= (the fixnum (funcall valuator (aref arr j))) (the fixnum x)))
 		  (loop do
 		       (incf i)
-		     until (>= (funcall valuator (aref arr i)) x))
-		  (if (< i j)
+		     until (>= (the fixnum (funcall valuator (aref arr i))) (the fixnum x)))
+		  (if (< (the int32 i) (the int32 j))
 		      (rotatef (aref arr i) (aref arr j))
-		      (return-from %partition j))))))
+		      (return-from %partition (the int32 j)))))))
     (when (< lo hi)
       (let ((p (%partition arr lo hi)))
-	(quicksort arr lo p :valuator valuator)
-	(quicksort arr (1+ p) hi :valuator valuator))))
+	(quicksort-iv arr lo p :valuator valuator)
+	(quicksort-iv arr (1+ p) hi :valuator valuator))))
   arr)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-(defun quicksort-* (arr lo hi &key (valuator #'identity))
-  (declare (type (simple-array * (*)) arr)
-	   (type fixnum lo hi)
+(defun quicksort-fv (arr lo hi &key (valuator #'identity))
+  "Sorts the numeric elements of the array.  This is an in-place sort, thus alters the original contents of the passed array.  This presumes the valuator returns a single-float."
+  (declare (type (simple-array uint32 (*)) arr)
+	   (type uint32 lo hi)
 	   (type function valuator))
   (flet ((%partition (arr p r)
-	   (declare (type (simple-array * (*)) arr)
-		    (type fixnum p r))
+	   (declare (type (simple-array uint32 (*)) arr)
+		    (type uint32 p r))
 	   (let ((x (funcall valuator (aref arr p)))
 		 (i (1- p))
 		 (j (1+ r)))
+	     (declare (type single-float x)
+		      (type int32 i j))
 	     (loop do
 		  (loop do
 		       (decf j)
-		     until (<= (funcall valuator (aref arr j)) x))
+		     until (<= (the single-float (funcall valuator (aref arr j))) (the single-float x)))
 		  (loop do
 		       (incf i)
-		     until (>= (funcall valuator (aref arr i)) x))
-		  (if (< i j)
+		     until (>= (the single-float (funcall valuator (aref arr i))) (the single-float x)))
+		  (if (< (the int32 i) (the int32 j))
 		      (rotatef (aref arr i) (aref arr j))
-		      (return-from %partition j))))))
+		      (return-from %partition (the int32 j)))))))
     (when (< lo hi)
       (let ((p (%partition arr lo hi)))
-	(quicksort arr lo p)
-	(quicksort arr (1+ p) hi))))
+	(quicksort-fv arr lo p :valuator valuator)
+	(quicksort-fv arr (1+ p) hi :valuator valuator))))
   arr)
+
+
+
+;; yanked from my game project, to profile function performance
+(defun is-lambda? (fun)
+  (declare (type function fun))
+  (multiple-value-bind (lam      ;; function's defining lambda expression
+                        clo      ;; enclosed in non-null lexical environment?
+                        name)    ;; what we care about
+      (function-lambda-expression fun)
+    (consp name)))
+
+;; yanked from my game project, to profile function performance
+(defun get-all-symbols (&optional package-name)
+  "Get all function-bound symbols in a package."
+  (let ((lst nil)
+        (package (find-package package-name)))
+    (do-all-symbols (s lst)
+      (when (and (fboundp s)
+                 (not (null (symbol-function s)))
+                 (not (is-lambda? (symbol-function s))))
+        (if package
+            (when (eql (symbol-package s) package)
+              (push s lst))
+            (push s lst))))
+    lst))
+
+;; yanked from my game project, to profile function performance
+(defun profile-all (&optional (package-name (package-name *package*)))
+  (eval
+   (append (list 'sb-profile:profile)
+           (loop for sym in (get-all-symbols package-name) collect sym))))
 
