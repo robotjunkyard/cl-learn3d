@@ -49,15 +49,18 @@ the sdl2:with-init code."
 (defparameter *x-res* 640)
 (defparameter *y-res* 480)
 (declaim (type uint16 *x-res* *y-res*))
+
 (defun setres (x y)
   (setf *x-res* x
 	*y-res* y))
 		
 (defun rotate ()
-  (setf *rotmat* 
-	(axis-rotate (sb-cga:normalize (sb-cga:vec 1.0 0.0 0.0))
-		     (mod (* 0.001 (sdl2:get-ticks)) 360.0)))
-)
+  (setf *rotmat*
+	(axis-rotate (sb-cga:normalize (sb-cga:vec 0.0 0.0 1.0))
+		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))
+
+(defun reset-world-rotation ()
+  (setf *rotmat* (sb-cga:identity-matrix)))
 
 (defun render-stuff (renderer)
   (setq *world-matrix* (sb-cga:matrix* *pmat* *vmat* *rotmat*))
@@ -72,17 +75,19 @@ the sdl2:with-init code."
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))
 
+(defun camera (ex ey ez tx ty tz)
+  (setq *vmat*
+	(look-at 
+	 (sb-cga:vec ex ey ez)
+	 (sb-cga:vec tx ty tz)
+	 (sb-cga:vec 0.0 0.0 1.0))))
+
 (defun main ()
   (sb-ext:gc :full t)
   (with-main
-    (setq *vmat*
-	  (look-at 
-	   (sb-cga:normalize
-	    (sb-cga:vec 0.0 1.0 1.0))
-	   (sb-cga:vec 0.0 0.0 0.0)
-	   (sb-cga:vec 1.0 0.0 0.0))
-
-	  *model* (load-model "ico"))
+    (camera 0.0 1.0 1.0
+	    0.0 0.0 0.0)
+    (setq *model* (load-model "ico"))
     (sdl2:with-init (:everything)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
@@ -98,4 +103,5 @@ the sdl2:with-init code."
 	     #+SWANK (update-swank))
 	    (:quit ()
 		   t)))))))
+
 

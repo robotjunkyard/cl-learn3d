@@ -41,6 +41,7 @@
    0.0  0.0  0.0  1.0))
 
 (defun ortho (left right bottom top near far)
+  (declare (type single-float left right bottom top near far))
   (sb-cga:matrix
    (/ 2.0 (- right left))  0.0  0.0  (- (/ (+ right left)
 					   (- right left)))
@@ -52,8 +53,7 @@
 
 (defun axis-rotate (u a)
   (declare (type sb-cga:vec u)
-	   (type single-float a)
-	   (optimize (speed 3) (debug 0) (safety 0)))
+	   (type single-float a))
   ;; most of these are for legibility
   (let* ((ux (aref u 0))
 	 (uy (aref u 1))

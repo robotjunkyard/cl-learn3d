@@ -203,13 +203,11 @@
 (defun sort-mesh-face-draw-order (mesh tmat)
   "In-place sorts the FACE-DRAW-ORDER array of a given mesh object given a transformation matrix 'TMATRIX' and vector 'CAMERA-ORIGIN'"
   (declare (type mesh mesh))
-  (flet
-      ()
-    (quicksort-fv (mesh-face-draw-order mesh)
-		  0 (1- (length (mesh-face-draw-order mesh)))
-		  :valuator #'(lambda (face#)
-				(declare (type uint32 face#))
-				(tri-sort-valuator mesh face# tmat)))))
+  (quicksort-fv (mesh-face-draw-order mesh)
+		0 (1- (length (mesh-face-draw-order mesh)))
+		:valuator #'(lambda (face#)
+			      (declare (type uint32 face#))
+			      (tri-sort-valuator mesh face# tmat))))
 
 (defun transform-model (mesh mat)
   "Update a model's vertexdata-* field to be the transformed version of its static vertex data, given the passed matrix."
@@ -228,6 +226,13 @@
 	     (aref (mesh-vertexdata-* mesh) (+ 2 vi)) (aref tv 2)))
   nil)       
 
-;;(defun cull-backfaces (mesh mat)
-;;  "Update a model's face-visibility-bits field to flag only faces pointing at the camera as visible."
-  
+#|(defun cull-backfaces (mesh tmat)
+  "Updates a model's face-visibility-bits field to flag only faces pointing at the camera as visible."
+  (declare (type mesh mesh)
+	   (type (simple-array single-float (16)) tmat)
+	   (dynamic-extent tmat))
+  (loop for face# of-type uint32 below (length (mesh-faces mesh)) do
+       (multiple-value-bind (x1 y1 z1 x2 y2 z2 x3 y3 z3)
+	   (mesh-face-coords mesh face#)
+(|#
+
