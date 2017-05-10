@@ -83,7 +83,7 @@ the sdl2:with-init code."
   (setf *pmat* (sb-cga:identity-matrix))
   (setf *pmat* (perspective-projection 90.0 0.1 122.0))
   (setf *scale-matrix*
-	(scale 1.5 1.5 1.5))
+	(scale 0.15 0.15 0.15))
   (setf *rotation-matrix*
 	(rotate 45.0 -1.0 0.0 0.0))
   (setf *rotation-matrix*
@@ -99,10 +99,10 @@ the sdl2:with-init code."
   (with-main
     (set-camera 14.0 14.0 14.0
 		0.0 0.0 0.0)
-    (setq *model* (load-model "thing"))
+    (setq *model* (load-model "ship"))
     (setf *world-matrix* (sb-cga:identity-matrix))
     (sdl2:with-init (:everything)
-      (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
+      (sdl2:with-window (win :title "Learn3D" :flags '(:shown :fullscreen)
 			     :w *x-res* :h *y-res*)
 	(sdl2:with-renderer (renderer win :flags '(:accelerated :presentvsync))
 	  (sdl2:with-event-loop (:method :poll)
