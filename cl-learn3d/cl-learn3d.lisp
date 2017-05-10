@@ -2,8 +2,8 @@
 
 (in-package #:cl-learn3d)
 
-(defparameter *model* nil)
-(defparameter *delay* 1.0)
+(defvar *model* nil)
+(defparameter *delay* 2.0)  ;; actual FPS = this / 60.0
 (defparameter *font* nil)
 (defparameter *draw-frame* 0)
 
@@ -33,17 +33,6 @@ the sdl2:with-init code."
             (when connection
               (swank::handle-requests connection t)))))
 
-(defparameter *vmat*
-  (look-at (sb-cga:normalize (sb-cga:vec 0.0 1.0 1.0))
-	   (sb-cga:vec 0.0 0.0 0.0)
-	   (sb-cga:vec 1.0 0.0 0.0))  "World's view matrix")
-(defparameter *pmat*
-  (ortho-projection 8.0 8.0 0.25 8.0) "World's projection matrix")
-(defparameter *rotmat*
-  (sb-cga:identity-matrix)            "World's rotation matrix")
-(defparameter *world-matrix*
-  (sb-cga:identity-matrix))
-(declaim (type (simple-array single-float (16)) *vmat* *pmat* *rotmat* *world-matrix*))
 (defparameter *axis-size* 4.0)
 
 (defparameter *x-res* 640)
@@ -54,19 +43,18 @@ the sdl2:with-init code."
   (setf *x-res* x
 	*y-res* y))
 		
-(defun rotate ()
-  (setf *rotmat*
+#|(defun rotate ()
+  (setf *rotation-matrix*
 	(axis-rotate (sb-cga:normalize (sb-cga:vec 0.0 0.0 1.0))
-		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))
+		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))|#
 
 (defun reset-world-rotation ()
-  (setf *rotmat* (sb-cga:identity-matrix)))
+  (setf *rotation-matrix* (sb-cga:identity-matrix)))
 
 (defun render-stuff (renderer)
-  (setq *world-matrix* (sb-cga:matrix* *pmat* *vmat* *rotmat*))
   (sdl2:set-render-draw-color renderer 0 0 0 255)
   (sdl2:render-clear renderer)
-  (rotate)
+  ;;;; (rotate)
   (sdl2:set-render-draw-color renderer 64 127 255 255)
   (when *model*
     (draw-axes renderer)
@@ -75,19 +63,50 @@ the sdl2:with-init code."
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))
 
-(defun camera (ex ey ez tx ty tz)
-  (setq *vmat*
+(defun set-camera (ex ey ez tx ty tz &optional (fov 90.0))
+  (declare (type single-float ex ey ez tx ty tz fov))
+  (setf *vmat*
 	(look-at 
 	 (sb-cga:vec ex ey ez)
 	 (sb-cga:vec tx ty tz)
-	 (sb-cga:vec 0.0 0.0 1.0))))
+	 (sb-cga:vec 0.0 0.0 1.0))
+
+	(aref *camera-eye* 0) ex
+	(aref *camera-eye* 1) ey
+	(aref *camera-eye* 2) ez
+
+	(aref *camera-target* 0) tx
+	(aref *camera-target* 1) ty
+	(aref *camera-target* 2) tz
+
+	;;(*translation-matrix* (translate ex ey ez))
+  ))
+
+(defun main-idle (renderer)
+  #|(let ((dist (abs (* 1.0 (sin (* 0.05 *draw-frame*))))))
+    (unless (= 0.0 dist)
+      (set-camera 0.1 (* 0.01 dist) dist 0.0 0.0 0.0)))|#
+  (set-camera 0.0 0.2 0.9 0.0 0.0 0.0)
+  (setf *pmat* (perspective-projection 85.0 0.1 122.0))
+  (setf *scale-matrix*
+	(scale 1.0 1.0 1.0))
+  (setf *rotation-matrix*
+	(rotate 0.0 1.0 0.0 0.0))
+  (setf *rotation-matrix*
+	(sb-cga:matrix* *rotation-matrix*
+			(rotate (mod (* 0.025 *draw-frame*) 360.0) 0.0 0.0 1.0)))
+  (update-world-transformation-matrix)  ;; update world's Translate/Scale/Rotate matrix
+  (update-world-matrix)                 ;; update world matrix to be P*V*M
+  (render-stuff renderer)
+  (incf *draw-frame*))
 
 (defun main ()
   (sb-ext:gc :full t)
   (with-main
-    (camera 0.0 1.0 1.0
-	    0.0 0.0 0.0)
-    (setq *model* (load-model "ico"))
+    (set-camera 14.0 14.0 14.0
+		0.0 0.0 0.0)
+    (setq *model* (load-model "thing"))
+    (setf *world-matrix* (sb-cga:identity-matrix))
     (sdl2:with-init (:everything)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
@@ -97,9 +116,8 @@ the sdl2:with-init code."
 	     ()
 	     (sleep (/ *delay* 60))
 	     (continuable
-	       ;;; (format t " ------ ~8d ------ ~%" *draw-frame*)
-	       (render-stuff renderer)
-	       (incf *draw-frame*))
+	       (main-idle renderer)
+	       )
 	     #+SWANK (update-swank))
 	    (:quit ()
 		   t)))))))

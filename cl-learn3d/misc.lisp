@@ -2,6 +2,9 @@
 
 (in-package :cl-learn3d)
 
+(defconstant +pi-s+ (coerce pi 'single-float))
+(declaim (type single-float +pi-s+))
+
 (defun tokenize-text-file-into-lines (filename)
   (declare (type (or string pathname) filename))
   (with-open-file (in filename)
@@ -114,3 +117,11 @@
    (append (list 'sb-profile:profile)
            (loop for sym in (get-all-symbols package-name) collect sym))))
 
+(declaim (inline deg2rad))
+(defun deg2rad (degrees)
+  (declare (type single-float degrees))
+  (/ (* degrees +pi-s+) 180.0))
+
+(defmacro clamp (val low high)
+  ;; (declare (type (or integer single-float) val low high))
+  `(min (max ,val ,low) ,high))

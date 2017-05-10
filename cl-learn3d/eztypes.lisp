@@ -13,6 +13,13 @@
 (deftype uint32 ()
   '(unsigned-byte 32))
 
+(deftype mat4x4 ()
+  '(simple-array single-float (16)))
+(deftype vec3 ()
+  '(simple-array single-float (3)))
+(deftype vec4 ()
+  '(simple-array single-float (4)))
+
 ;;(defstruct colorf
 ;;  (r 0.0 :type single-float)
 ;;  (g 0.0 :type single-float)

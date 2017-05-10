@@ -11,6 +11,7 @@
   :components ((:file "package")
 	       (:file "eztypes")
 	       (:file "misc")
+	       (:file "matrix-state")
 	       (:file "camera")
 	       (:file "draw")
 	       (:file "model")

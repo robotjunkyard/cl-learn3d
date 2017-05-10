@@ -7,7 +7,7 @@
 
 (defun draw-3d-line (x1 y1 z1 x2 y2 z2 tmat renderer)
   (declare (type single-float x1 y1 z1 x2 y2 z2)
-	   (type (simple-array single-float (16)) tmat))
+	   (type mat4x4 tmat))
   (let* ((p1 (sb-cga:vec x1 y1 z1))
 	 (p2 (sb-cga:vec x2 y2 z2))
 	 (tp1 (sb-cga:transform-point p1 tmat))
@@ -16,7 +16,7 @@
 	 (sy1 (round (* (- 1 (aref tp1 1)) *y-res* 0.5)))
 	 (sx2 (round (* (1+ (aref tp2 0))  *x-res* 0.5)))
 	 (sy2 (round (* (- 1 (aref tp2 1)) *y-res* 0.5))))
-    (declare (type (simple-array single-float (3)) p1 p2 tp1 tp2)
+    (declare (type vec3 p1 p2 tp1 tp2)
 	     (type int32 sx1 sy1 sx2 sy2))
     (sdl2:render-draw-line 
      renderer
@@ -103,7 +103,11 @@
 	   (loop
 	      for y from topy below midy
 	      do
-		(sdl2:render-draw-line renderer (round sx0) y (round sx1) y)
+		(sdl2:render-draw-line renderer
+				       (clamp (round sx0) 0 *x-res*)
+				       (clamp y 0 *y-res*)
+				       (clamp (round sx1) 0 *x-res*)
+				       (clamp y 0 *y-res*))
 		(incf sx0 dupper)
 		(incf sx1 dlong))
 	   (when (zerop btmy-midy)
@@ -114,7 +118,11 @@
 	   (loop
 	      for y from midy below btmy
 	      do
-		(sdl2:render-draw-line renderer (round sx0) y (round sx1) y)
+		(sdl2:render-draw-line renderer
+				       (clamp (the fixnum (round sx0)) 0 *x-res*)
+				       (clamp y 0 *y-res*)
+				       (clamp (the fixnum (round sx1)) 0 *x-res*)
+				       (clamp y 0 *y-res*))
 		(incf sx0 dlower)
 		(incf sx1 dlong))
 	 DRAW-WIREFRAME
@@ -122,41 +130,17 @@
 	     (sdl2:set-render-draw-color renderer 255 255 255 255)
 	     (sdl2:render-draw-line renderer x1 y1 x2 y2)
 	     (sdl2:render-draw-line renderer x2 y2 x3 y3)
-	     (sdl2:render-draw-line renderer x3 y3 x1 y1))
-	   ))))
+	     (sdl2:render-draw-line renderer x3 y3 x1 y1)
+	   )))))
   nil)
-
-#|(let ((coords (make-array 6 :element-type
-			  '(signed-byte 32))))
-  (defun draw-3d-triangle (tri renderer &key (fill t) (wireframe nil)
-					    (color *default-triangle-color*))
-    (declare (type boolean fill wireframe)
-	     ;;;; (type (single-array single-float (16)) tmat)
-	     (type colori color))
-    (loop for i below 3 do
-	 (let* ((tmat (sb-cga:matrix* *pmat* *vmat* *rotmat*))
-		(tv (sb-cga:transform-point 
-		     (aref tri i)
-		     tmat))
-		;;(tv (aref tri i))
-		;; translate to screen coordinates
-		(x (* (/ (1+ (aref tv 0)) 2.0) *x-res*))
-		(y (* (/ (- 1 (aref tv 1)) 2.0) *y-res*)))
-	   (setf (aref coords (* 2 i))       (round x)
-		 (aref coords (1+ (* 2 i)))  (round y))))
-      (sdl2:set-render-draw-color renderer 207 205 155 255)
-      (draw-2d-filled-triangle (aref coords 0) (aref coords 1)
-			       (aref coords 2) (aref coords 3)
-			       (aref coords 4) (aref coords 5)
-			       renderer
-			       :wireframe t :fill t)))|#
 
 (defun draw-3d-triangle-* (x1 y1 z1 x2 y2 z2 x3 y3 z3 tmat
 			   renderer &key (fill t) (wireframe t)
-				      (color *default-triangle-color*))
+				      (color *default-triangle-color*)
+				      (cull-backfaces nil))
   (declare (type single-float x1 y1 x2 y2 x3 y3)
-	   (type (simple-array single-float (16)) tmat)
-	   (type boolean fill wireframe)
+	   (type mat4x4 tmat)
+	   (type boolean fill wireframe cull-backfaces)
 	   (type colori color)
 	   (dynamic-extent tmat))
   (let* ((v1  (sb-cga:vec x1 y1 z1))
@@ -165,7 +149,7 @@
 	 (tv1 (sb-cga:transform-point v1 tmat))
 	 (tv2 (sb-cga:transform-point v2 tmat))
 	 (tv3 (sb-cga:transform-point v3 tmat)) )
-    (declare (type (simple-array single-float (3)) v1 v2 v3 tv1 tv2 tv3)
+    (declare (type vec3 v1 v2 v3 tv1 tv2 tv3)
 	     (dynamic-extent v1 v2 v3 tv1 tv2 tv3))
     (let* (#|(n (sb-cga:cross-product (sb-cga:vec- v2 v1)
 				    (sb-cga:vec- v3 v1)))
@@ -175,7 +159,7 @@
 	   (n (sb-cga:cross-product (sb-cga:vec- tv2 tv1) (sb-cga:vec- tv3 tv1)))
 	   (negv1 (sb-cga:vec* tv1 -1.0))
 	   (negv1.n (sb-cga:dot-product negv1 n)))
-	(when (>= negv1.n 0.0)
+	(when (and cull-backfaces (>= negv1.n 0.0))
 	  (return-from draw-3d-triangle-* nil))
       (let* ((tv1x (aref tv1 0))
 	     (tv1y (aref tv1 1))
@@ -194,7 +178,10 @@
 	(sdl2:set-render-draw-color renderer (colori-r color)
 				    (colori-g color) (colori-b color)
 				    (colori-a color))
-	(draw-2d-filled-triangle sx1 sy1 sx2 sy2 sx3 sy3
+	;; TODO: check if outside view frustum and don't bother drawing if so
+	(draw-2d-filled-triangle sx1 sy1
+				 sx2 sy2
+				 sx3 sy3
 				 renderer
 				 :wireframe wireframe :fill fill)))))
   

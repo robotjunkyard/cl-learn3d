@@ -6,10 +6,10 @@
 ;; V = View
 ;; P = Projection
 
-(defvar *camera-eye* (sb-cga:vec 0.0 0.0 0.0)
+(defvar *camera-eye* (sb-cga:vec 1.0 1.0 1.0)
   "For LOOK-AT to memorize the camera's position for the rest of the program to query if needed.")
 (defvar *camera-target* (sb-cga:vec 0.0 0.0 0.0))
-(declaim (type (simple-array single-float (3)) *camera-eye* *camera-target*))
+(declaim (type vec3 *camera-eye* *camera-target*))
 
 (defun look-at (eye target up)
   "Returns a View matrix."
@@ -26,9 +26,9 @@
 		       (aref vx 1)  (aref vy 1)  (aref vz 1)  0.0
 		       (aref vx 2)  (aref vy 2)  (aref vz 2)  0.0
 		       dotxi-       dotyi-       dotzi-       1.0)))
-    (setf (aref *camera-eye* 0) (aref eye 0)
-	  (aref *camera-eye* 1) (aref eye 1)
-	  (aref *camera-eye* 2) (aref eye 2))
+    #|(format t "vz: ~a~%vx: ~a~%vy: ~a~%" vz vx vy)
+    (format t ".x: ~a~%.y: ~a~%.z: ~a~%" dotxi- dotyi- dotzi-)
+    (format t "IVM = ~a~%" ivm)|#
     ivm))
 
 (defun ortho-projection (width height near far)
@@ -40,7 +40,19 @@
    0.0  0.0  (/ -2.0 (- far near))  (- (/ (+ far near) (- far near)))
    0.0  0.0  0.0  1.0))
 
-(defun ortho (left right bottom top near far)
+(defun perspective-projection (fov near far)
+  (declare (type single-float fov near far))
+  (let ((s (/ 1.0 (tan (* (/ fov 2.0) #.(/ +pi-s+ 180.0))))))
+    (declare (type single-float s))
+    (sb-cga:matrix
+     s     0.0     0.0     0.0
+     0.0   s       0.0     0.0
+     0.0   0.0  (- (/ far (- far near)))   -1.0
+     0.0   0.0  (- (/ (* far near) (- far near)))  0.0)))
+			  
+    
+
+#|(defun ortho (left right bottom top near far)
   (declare (type single-float left right bottom top near far))
   (sb-cga:matrix
    (/ 2.0 (- right left))  0.0  0.0  (- (/ (+ right left)
@@ -49,7 +61,8 @@
 					   (- top bottom)))
    0.0  0.0  (/ -2.0 (- far near))  (- (/ (+ far near)
 					  (- far near)))
-   0.0  0.0  0.0  1.0))
+   0.0  0.0  0.0  1.0))|#
+
 
 (defun axis-rotate (u a)
   (declare (type sb-cga:vec u)
