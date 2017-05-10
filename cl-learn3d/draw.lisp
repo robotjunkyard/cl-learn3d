@@ -17,6 +17,7 @@
 	 (sx2 (round (* (1+ (aref tp2 0))  *x-res* 0.5)))
 	 (sy2 (round (* (- 1 (aref tp2 1)) *y-res* 0.5))))
     (declare (type vec3 p1 p2 tp1 tp2)
+	     (dynamic-extent p1 p2 tp1 tp2)
 	     (type int32 sx1 sy1 sx2 sy2))
     (sdl2:render-draw-line 
      renderer
@@ -104,9 +105,9 @@
 	      for y from topy below midy
 	      do
 		(sdl2:render-draw-line renderer
-				       (clamp (round sx0) 0 *x-res*)
+				       (clamp (the int32 (round sx0)) 0 *x-res*)
 				       (clamp y 0 *y-res*)
-				       (clamp (round sx1) 0 *x-res*)
+				       (clamp (the int32 (round sx1)) 0 *x-res*)
 				       (clamp y 0 *y-res*))
 		(incf sx0 dupper)
 		(incf sx1 dlong))
@@ -119,9 +120,9 @@
 	      for y from midy below btmy
 	      do
 		(sdl2:render-draw-line renderer
-				       (clamp (the fixnum (round sx0)) 0 *x-res*)
+				       (clamp (the int32 (round sx0)) 0 *x-res*)
 				       (clamp y 0 *y-res*)
-				       (clamp (the fixnum (round sx1)) 0 *x-res*)
+				       (clamp (the int32 (round sx1)) 0 *x-res*)
 				       (clamp y 0 *y-res*))
 		(incf sx0 dlower)
 		(incf sx1 dlong))
@@ -134,16 +135,6 @@
 	   )))))
   nil)
 
-#|(n      (sb-cga:cross-product (sb-cga:vec- v2 v1)
-					 (sb-cga:vec- v3 v1)))
-	   (p      (sb-cga:vec* (sb-cga:transform-point *camera-eye* tmat) -1.0))  ;;(sb-cga:vec- tv1 *camera-eye*))
-	   (v0-p   (sb-cga:normalize (sb-cga:vec- v1 p)))
-	   (v0-p.n (sb-cga:dot-product v0-p n))
-
-	   
-(n (sb-cga:cross-product (sb-cga:vec- tv2 tv1) (sb-cga:vec- tv3 tv1)))
-	   (negv1 (sb-cga:vec* tv1 -1.0))
-	   (negv1.n (sb-cga:dot-product negv1 n))|#
 
 (defun calculate-tri-normal (v1 v2 v3)
   (declare (type vec3 v1 v2 v3)
@@ -155,7 +146,7 @@
     (sb-cga:cross-product u v)))
    
 (defun draw-3d-triangle-* (x1 y1 z1 x2 y2 z2 x3 y3 z3 tmat
-			   renderer &key (fill t) (wireframe t)
+			   renderer &key (fill t) (wireframe nil)
 				      (color *default-triangle-color*)
 				      (cull-backfaces t))
   (declare (type single-float x1 y1 x2 y2 x3 y3)
@@ -197,5 +188,7 @@
 				 sx2 sy2
 				 sx3 sy3
 				 renderer
-				 :wireframe wireframe :fill fill)))))
+				 :wireframe wireframe :fill fill
+				 :color color
+				 )))))
   

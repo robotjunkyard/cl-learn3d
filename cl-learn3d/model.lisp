@@ -5,23 +5,43 @@
   ;;; multiple-of-3-length array of integers referring to the INDEX of a vertex from host mesh's vertexdata
   (vertices (make-array 0 :element-type 'uint32 :initial-element 0 :adjustable t :fill-pointer 0) :type (vector uint32 *)))
 
+(defstruct material
+  (name (error "need a name for material") :type string :read-only t)
+  (color (make-colori) :type colori))
+
+(defparameter *default-triangle-material*
+  (make-material :name "Default"
+		 :color (make-colori :r 128 :g 160 :b 160)))
+
 (defstruct mesh
   ;;; a multiple-of-3-length array containing x1,y1,z1,x2,y2,z2,...xn,yn,zn where n = # vertices
   (vertexdata (make-array 0 :element-type 'single-float :adjustable t :fill-pointer 0)
 	      :type (vector single-float))
   (faces (make-array 0 :element-type 'meshface :adjustable t :fill-pointer 0)
 	 :type (VECTOR T *))
-
-  ;;; Dynamic data below
+  (face-materials (make-array 0 :element-type 'meshface :adjustable t :fill-pointer 0)
+			 :type (VECTOR T *))
+  (mtllib #() :type (SIMPLE-VECTOR *))  ;; created from result of LOAD-MTLLIB function
+  (face-material-indices (make-array 0 :element-type 'int8) :type (SIMPLE-ARRAY INT8 (*)))
+  
+  ;;;; Dynamically-altered data below
   ;; vertexdata-* is the "output" of transformation operations done from vertexdata
   (vertexdata-* (make-array 0 :element-type 'single-float :adjustable t :fill-pointer 0)
 	       :type (vector single-float))
   ;; used, and continuously clobbered per call, by sorted model draw function
   (face-draw-order (make-array 0 :element-type 'uint32 :adjustable t :fill-pointer 0)
 		   :type (vector uint32))
-  (face-visibility-bits (make-array 0 :element-type 'bit :adjustable t :fill-pointer 0)
-			:type (vector bit))
-  )
+  ;;(face-visibility-bits (make-array 0 :element-type 'bit :adjustable t :fill-pointer 0)
+  ;;:type (vector bit)
+			)
+(defun find-material-index (mesh material-name)
+  (declare (type mesh mesh)
+	   (type string material-name))
+  (loop for m across (mesh-mtllib mesh)
+     for i of-type int16 from 0
+     do (when (string= (material-name m) material-name)
+	  (return-from find-material-index i)))
+  -1)
 
 (defun load-model (name)
   (declare (type string name))
@@ -36,35 +56,40 @@
 				 :fill-pointer 0))
 	 (vertexcount 0)
 	 (facecount   0)
+	 (mtllib-filename nil)
+	 (usemtl-table ())
 	 (faces (make-array 0 :element-type 'meshface :adjustable t :fill-pointer 0)))
     (declare (type uint32 vertexcount facecount))
     (loop for line in lines do
 	 (let ((tokens (split-sequence:split-sequence #\Space line)))
 	   (case-using
-	    #'equal (first tokens)
-	    ("mtllib"  (format t "MtlLib (ignored):    ~a~%" (cdr tokens)))
-	    ("o"       (format t "Object (ignored):    ~a~%" (cdr tokens)))
-	    ("v" (let ((x (read-from-string (first (cdr tokens))))
-		       (y (read-from-string (second (cdr tokens))))
-		       (z (read-from-string (third (cdr tokens)))))
-		   (declare (type single-float x y z))
-		   (vector-push-extend x vertexdata)
-		   (vector-push-extend y vertexdata)
-		   (vector-push-extend z vertexdata))
-		 (incf (the uint32 vertexcount)))
-	    ("vn" nil)   ;; vnormals are not used in this demo
-	    ("vt" nil)   ;; uv coords are not used in this demo (not until texturing implemented, at least)
-	    ("f" (let ((face (make-meshface)))
-		   (loop for v of-type string in (cdr tokens) do
-			(let ((s (subst NIL "" (split-sequence:split-sequence #\/ v)
-					:test #'equal)))
-			  (vector-push-extend
-			   (1- (read-from-string (first s)))
-			   (meshface-vertices face))))
-		   (incf (the uint32 facecount))
-		   (vector-push-extend face faces)))
-	    ("s" nil)   ;; not 100% sure what this is.  ignoring it never caused problems
-	    )))
+	       #'equal (first tokens)
+	     ("mtllib"  (format t "MtlLib          :    ~a~%" (setf mtllib-filename (car (cdr tokens)))))
+	     ("usemtl"  (let ((mtlname (car (cdr tokens))))
+			  (format t "UseMtl          :    ~a (@~d)~%"  mtlname facecount)
+			  (setf usemtl-table (append usemtl-table (list facecount mtlname)))))
+	     ("o"       (format t "Object (ignored):    ~a~%" (cdr tokens)))  ;; is 'o' directive even useful??
+	     ("v" (let ((x (read-from-string (first (cdr tokens))))
+			(y (read-from-string (second (cdr tokens))))
+			(z (read-from-string (third (cdr tokens)))))
+		    (declare (type single-float x y z))
+		    (vector-push-extend x vertexdata)
+		    (vector-push-extend y vertexdata)
+		    (vector-push-extend z vertexdata))
+		  (incf (the uint32 vertexcount)))
+	     ("vn" nil)   ;; vnormals are not used in this demo
+	     ("vt" nil)   ;; uv coords are not used in this demo (not until texturing implemented, at least)
+	     ("f" (let ((face (make-meshface)))
+		    (loop for v of-type string in (cdr tokens) do
+			 (let ((s (subst NIL "" (split-sequence:split-sequence #\/ v)
+					 :test #'equal)))
+			   (vector-push-extend
+			    (1- (read-from-string (first s)))
+			    (meshface-vertices face))))
+		    (incf (the uint32 facecount))
+		    (vector-push-extend face faces)))
+	     ("s" nil)   ;; not 100% sure what this is.  ignoring it never caused problems
+	     )))
     (if (> (the uint32 (length vertexdata)) 0)
 	(let ((newmodel
 	       (make-mesh :vertexdata vertexdata
@@ -73,15 +98,28 @@
 			  :face-draw-order (make-array facecount :element-type 'uint32
 						       :initial-contents (loop for i below facecount collect i)))))
 	  (format t "Mesh loaded with ~d vertices and ~d faces.~%" vertexcount facecount)
-	  (loop repeat facecount do
-	       (vector-push-extend 1 (mesh-face-visibility-bits newmodel)))
-	  newmodel)
+	  (when mtllib-filename
+	    (setf (mesh-mtllib newmodel) (load-mtllib mtllib-filename))
+	    (setf (mesh-face-material-indices newmodel)
+		  (make-array facecount :element-type 'int8 :initial-element 0))
+	    (let ((mtl-i -1))
+	      (loop for i from 0 below (length (mesh-faces newmodel)) do
+		   (let ((new-mtl-name (getf usemtl-table i)))  ;; first check if we're supposed to assign diff mtl
+		     (when new-mtl-name  ;; string or nil
+		       (let ((new-mtl-index (find-material-index newmodel new-mtl-name)))
+			 (when (<= 0 new-mtl-index)
+			   (setf mtl-i new-mtl-index)))))
+		   (setf (aref (mesh-face-material-indices newmodel) i) mtl-i))))
+	    
+	  ;;;;(loop repeat facecount do
+	  ;;;;     (vector-push-extend 1 (mesh-face-visibility-bits newmodel)))
+	    newmodel)
 	(progn (format t "Warning: 0 vertices loaded in load-model for file '~a', returning NIL!!"
 		       filename)
 	       NIL))))
 
-(defun mesh-vertex-coords (mesh vertex#)
-  "Returns an X,Y,Z triple-value of the coordinates of a requested vertex of a mesh."
+  (defun mesh-vertex-coords (mesh vertex#)
+    "Returns an X,Y,Z triple-value of the coordinates of a requested vertex of a mesh."
   (declare (type mesh mesh)
 	   (type uint16 vertex#))
   (let ((array-idx (* vertex# 3)))
@@ -143,12 +181,15 @@
   (sort-mesh-face-draw-order mesh *world-matrix*)
   (loop
      for face# across (mesh-face-draw-order mesh)
+     for material = (determine-material-for-face mesh face#)
      ;; for fc of-type uint32 from 0 do
      do
        ;;; (format t "~d, " face#)
        (multiple-value-bind (x1 y1 z1 x2 y2 z2 x3 y3 z3)
 	   (mesh-face-coords-* mesh face#)
-	 (draw-3d-triangle-* x1 y1 z1 x2 y2 z2 x3 y3 z3 *world-matrix* renderer))))
+	 (draw-3d-triangle-* x1 y1 z1 x2 y2 z2 x3 y3 z3 *world-matrix* renderer
+			     :color (material-color material)
+			     ))))
 
 (defun dist-points-nosqrt (x1 y1 z1 x2 y2 z2)
   (declare (type single-float x1 y1 z1 x2 y2 z2))
@@ -223,4 +264,38 @@
        (setf (aref (mesh-vertexdata-* mesh) vi)       (aref tv 0)
 	     (aref (mesh-vertexdata-* mesh) (+ 1 vi)) (aref tv 1)
 	     (aref (mesh-vertexdata-* mesh) (+ 2 vi)) (aref tv 2)))
-  nil)       
+  nil)
+
+(defun load-mtllib (filename)
+  (let* ((pathstring (pathname (concatenate 'string 
+					    "./models/"
+					    filename)))
+	 (lines (tokenize-text-file-into-lines pathstring))
+	 (materials ())
+	 (current-material nil))
+    (loop for line in lines do
+	 (let ((tokens (split-sequence:split-sequence #\Space line)))
+	   (case-using
+	       #'equal (first tokens)
+	     ("newmtl" (setf current-material
+			     (make-material :name (car (cdr tokens)))
+			     materials
+			     (append materials (list current-material))))
+	     ("Kd"     (let ((params (cdr tokens)))
+			 (let* ((r (read-from-string (first params)))
+				(g (read-from-string (second params)))
+				(b (read-from-string (third params))))
+			     (setf (material-color current-material)
+				   (convert-colorf-to-colori (make-colorf :r r :g g :b b :a 1.0)))))))))
+    (make-array (length materials)
+		:element-type 'material
+		:initial-contents materials)))
+    
+(defun determine-material-for-face (mesh face#)
+  (declare (type mesh mesh)
+	   (type uint32 face#))
+  (let ((mi (aref (mesh-face-material-indices mesh) face#)))
+    (declare (type int8 mi))
+    (cond ((= -1 mi)
+	   *default-triangle-material*)
+	  (T (aref (mesh-mtllib mesh) mi)))))

@@ -125,3 +125,23 @@
 (defmacro clamp (val low high)
   ;; (declare (type (or integer single-float) val low high))
   `(min (max ,val ,low) ,high))
+
+
+(defstruct colorf
+  (r 0.0 :type single-float)
+  (g 0.0 :type single-float)
+  (b 0.0 :type single-float)
+  (a 1.0 :type single-float))
+
+(defstruct colori
+  (r 0   :type uint8)
+  (g 0   :type uint8)
+  (b 0   :type uint8)
+  (a 255 :type uint8))
+
+(defun convert-colorf-to-colori (colorf)
+  (declare (type colorf colorf))
+  (make-colori :r (clamp (truncate (* 255 (colorf-r colorf))) 0 255)
+	       :g (clamp (truncate (* 255 (colorf-g colorf))) 0 255)
+	       :b (clamp (truncate (* 255 (colorf-b colorf))) 0 255)
+	       :a (clamp (truncate (* 255 (colorf-a colorf))) 0 255)))

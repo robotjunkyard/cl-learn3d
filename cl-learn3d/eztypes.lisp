@@ -19,15 +19,3 @@
   '(simple-array single-float (3)))
 (deftype vec4 ()
   '(simple-array single-float (4)))
-
-;;(defstruct colorf
-;;  (r 0.0 :type single-float)
-;;  (g 0.0 :type single-float)
-;;  (b 0.0 :type single-float)
-;;  (a 1.0 :type single-float))
-
-(defstruct colori
-  (r 0   :type uint8)
-  (g 0   :type uint8)
-  (b 0   :type uint8)
-  (a 255 :type uint8))
