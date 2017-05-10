@@ -164,7 +164,7 @@
   (declare (type mesh mesh)
 	   (type uint32 face#)
 	   (type mat4x4 tmat)
-	   (optimize (speed 3) (safety 0)))
+	   (optimize (speed 3) (safety 1)))
   (let ((cx (aref *camera-eye* 0))
 	(cy (aref *camera-eye* 1))
 	(cz (aref *camera-eye* 2)))
@@ -175,7 +175,7 @@
       (let* (;; yeah I guess the camera eye is supposed to be transformed too...
 	     ;; since results are visually less "mistakey" this way than with just
 	     ;; the unaltered coordinates.  gonna have to hit the books to be certain...
-	     (tcp  (sb-cga:transform-point (sb-cga:vec (+ cx) (+ cy) (+ cz)) tmat))    
+	     (tcp  (sb-cga:transform-point (sb-cga:vec (- cx) (- cy) (- cz)) tmat))    
 	     (tfp1 (sb-cga:transform-point (sb-cga:vec fx1 fy1 fz1) tmat))
 	     (tfp2 (sb-cga:transform-point (sb-cga:vec fx2 fy2 fz2) tmat))
 	     (tfp3 (sb-cga:transform-point (sb-cga:vec fx3 fy3 fz3) tmat))
@@ -187,18 +187,17 @@
 	     (tfz2 (aref tfp2 2))
 	     (tfx3 (aref tfp3 0))
 	     (tfy3 (aref tfp3 1))
-	     (tfz3 (aref tfp3 2))
-	     (squeeze -4.0)  #| smells kludgey |# ) 
+	     (tfz3 (aref tfp3 2)))
 	(declare (type mat4x4 tmat)
 		 (type vec3 tcp tfp1 tfp2 tfp3)
-		 (type single-float tfx1 tfy1 tfz1 tfx2 tfy2 tfz2 tfx3 tfy3 tfz3 squeeze)
+		 (type single-float tfx1 tfy1 tfz1 tfx2 tfy2 tfz2 tfx3 tfy3 tfz3)
 		 (dynamic-extent tcp tfp1 tfp2 tfp3))
 	(dist-points-nosqrt (aref tcp 0)
 			    (aref tcp 1)
 			    (aref tcp 2)
-			    (/ (min tfx1 tfx2 tfx3) squeeze)
-			    (/ (min tfy1 tfy2 tfy3) squeeze)
-			    (/ (min tfz1 tfz2 tfz3) squeeze))))))
+			    (min tfx1 tfx2 tfx3)
+			    (min tfy1 tfy2 tfy3)
+			    (min tfz1 tfz2 tfz3))))))
 
 (defun sort-mesh-face-draw-order (mesh tmat)
   "In-place sorts the FACE-DRAW-ORDER array of a given mesh object given a transformation matrix 'TMATRIX' and vector 'CAMERA-ORIGIN'"
@@ -212,7 +211,7 @@
 (defun transform-model (mesh mat)
   "Update a model's vertexdata-* field to be the transformed version of its static vertex data, given the passed matrix."
   (declare (type mesh mesh)
-	   (type tmat mat))
+	   (type mat4x4 mat))
   (loop
      for vi of-type uint32 below (length (mesh-vertexdata mesh)) by 3
      ;; this loop probably conses like a donkey... TODO: optimize this later, AFTER it works
