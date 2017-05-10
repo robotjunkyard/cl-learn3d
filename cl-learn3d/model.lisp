@@ -163,7 +163,7 @@
   "Returns distance between model (after local&world transforms) and the camera's origin."
   (declare (type mesh mesh)
 	   (type uint32 face#)
-	   (type (simple-array single-float (16)))
+	   (type mat4x4 tmat)
 	   (optimize (speed 3) (safety 0)))
   (let ((cx (aref *camera-eye* 0))
 	(cy (aref *camera-eye* 1))
@@ -189,8 +189,8 @@
 	     (tfy3 (aref tfp3 1))
 	     (tfz3 (aref tfp3 2))
 	     (squeeze -4.0)  #| smells kludgey |# ) 
-	(declare (type (simple-array single-float (16)) tmat)
-		 (type (simple-array single-float (3)) tcp tfp1 tfp2 tfp3)
+	(declare (type mat4x4 tmat)
+		 (type vec3 tcp tfp1 tfp2 tfp3)
 		 (type single-float tfx1 tfy1 tfz1 tfx2 tfy2 tfz2 tfx3 tfy3 tfz3 squeeze)
 		 (dynamic-extent tcp tfp1 tfp2 tfp3))
 	(dist-points-nosqrt (aref tcp 0)
@@ -212,7 +212,7 @@
 (defun transform-model (mesh mat)
   "Update a model's vertexdata-* field to be the transformed version of its static vertex data, given the passed matrix."
   (declare (type mesh mesh)
-	   (type (simple-array single-float (16)) mat))
+	   (type tmat mat))
   (loop
      for vi of-type uint32 below (length (mesh-vertexdata mesh)) by 3
      ;; this loop probably conses like a donkey... TODO: optimize this later, AFTER it works
@@ -225,14 +225,3 @@
 	     (aref (mesh-vertexdata-* mesh) (+ 1 vi)) (aref tv 1)
 	     (aref (mesh-vertexdata-* mesh) (+ 2 vi)) (aref tv 2)))
   nil)       
-
-#|(defun cull-backfaces (mesh tmat)
-  "Updates a model's face-visibility-bits field to flag only faces pointing at the camera as visible."
-  (declare (type mesh mesh)
-	   (type (simple-array single-float (16)) tmat)
-	   (dynamic-extent tmat))
-  (loop for face# of-type uint32 below (length (mesh-faces mesh)) do
-       (multiple-value-bind (x1 y1 z1 x2 y2 z2 x3 y3 z3)
-	   (mesh-face-coords mesh face#)
-(|#
-
