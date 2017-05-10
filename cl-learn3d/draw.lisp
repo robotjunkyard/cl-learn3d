@@ -146,7 +146,7 @@
     (sb-cga:cross-product u v)))
    
 (defun draw-3d-triangle-* (x1 y1 z1 x2 y2 z2 x3 y3 z3 tmat
-			   renderer &key (fill t) (wireframe nil)
+			   renderer &key (fill t) (wireframe t)
 				      (color *default-triangle-color*)
 				      (cull-backfaces t))
   (declare (type single-float x1 y1 x2 y2 x3 y3)
@@ -172,17 +172,17 @@
 	     (tv2y (aref tv2 1))
 	     (tv3x (aref tv3 0))
 	     (tv3y (aref tv3 1))
-	     (sx1 (round (* (+ 1.0 tv1x) *x-res*  0.5)))
-	     (sy1 (round (* (- 1.0 tv1y) *y-res*  0.5)))
-	     (sx2 (round (* (+ 1.0 tv2x) *x-res*  0.5)))
-	     (sy2 (round (* (- 1.0 tv2y) *y-res*  0.5)))
-	     (sx3 (round (* (+ 1.0 tv3x) *x-res*  0.5)))
-	     (sy3 (round (* (- 1.0 tv3y) *y-res*  0.5))))
+	     (sx1 (truncate (* (+ 1.0 tv1x) *x-res-float*  0.5)))
+	     (sy1 (round (* (- 1.0 tv1y) *y-res-float*  0.5)))
+	     (sx2 (round (* (+ 1.0 tv2x) *x-res-float*  0.5)))
+	     (sy2 (round (* (- 1.0 tv2y) *y-res-float*  0.5)))
+	     (sx3 (round (* (+ 1.0 tv3x) *x-res-float*  0.5)))
+	     (sy3 (round (* (- 1.0 tv3y) *y-res-float*  0.5))))
 	(declare (type single-float tv1x tv1y tv2x tv2y tv3x tv3y)
-		 (type int32 sx1 sy1 sx2 sy2 sx3 sy3))
-	(sdl2:set-render-draw-color renderer (colori-r color)
+		 (type fixnum sx1 sy1 sx2 sy2 sx3 sy3))
+	#|(sdl2:set-render-draw-color renderer (colori-r color)
 				    (colori-g color) (colori-b color)
-				    (colori-a color))
+				    (colori-a color))|#
 	;; TODO: check if outside view frustum and don't bother drawing if so
 	(draw-2d-filled-triangle sx1 sy1
 				 sx2 sy2

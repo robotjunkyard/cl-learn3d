@@ -37,7 +37,10 @@ the sdl2:with-init code."
 
 (defparameter *x-res* 640)
 (defparameter *y-res* 480)
-(declaim (type uint16 *x-res* *y-res*))
+(defparameter *x-res-float* 0.0)  ;;  these initialized by main
+(defparameter *y-res-float* 0.0)  ;;  " " " "
+(declaim (type uint16 *x-res* *y-res*)
+	 (type single-float *x-res-float* *y-res-float*))
 
 (defun setres (x y)
   (setf *x-res* x
@@ -77,18 +80,20 @@ the sdl2:with-init code."
 	*translation-matrix* (translate (- ex) (- ey) (- ez))
   ))
 
+(defparameter *scale* 0.25)
+
 (defun main-idle (renderer)
   (set-camera 0.0 0.0 5.5 0.0 0.0 1.0)
   (setf *vmat* (sb-cga:identity-matrix))
   (setf *pmat* (sb-cga:identity-matrix))
   (setf *pmat* (perspective-projection 90.0 0.1 122.0))
   (setf *scale-matrix*
-	(scale 1.0  1.0  1.0 ))
+	(scale *scale* *scale* *scale*))
   (setf *rotation-matrix*
 	(rotate 45.0 -1.0 0.0 0.0))
   (setf *rotation-matrix*
 	(sb-cga:matrix* *rotation-matrix*
-			(rotate (mod (* 0.5 *draw-frame*) 360.0) 0.0 0.0 1.0)))
+			(rotate (mod (* 0.25 *draw-frame*) 360.0) 0.0 0.0 1.0)))
   (update-world-transformation-matrix)  ;; update world's Translate/Scale/Rotate matrix
   (update-world-matrix)                 ;; update world matrix to be P*V*M
   (render-stuff renderer)
@@ -96,10 +101,12 @@ the sdl2:with-init code."
 
 (defun main ()
   (sb-ext:gc :full t)
+  (setf *x-res-float* (float *x-res*)
+	*y-res-float* (float *y-res*))
   (with-main
     (set-camera 14.0 14.0 14.0
 		0.0 0.0 0.0)
-    (setq *model* (load-model "matorb"))
+    (setq *model* (load-model "spaceship"))
     (setf *world-matrix* (sb-cga:identity-matrix))
     (sdl2:with-init (:everything)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
