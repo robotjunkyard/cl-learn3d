@@ -74,24 +74,21 @@ the sdl2:with-init code."
 	(aref *camera-target* 2) tz
 
 	;; umm... hmm
-	;; *translation-matrix* (translate (- ex) (- ey) (- ez))
+	*translation-matrix* (translate (- ex) (- ey) (- ez))
   ))
 
 (defun main-idle (renderer)
-  #|(let ((dist (abs (* 1.0 (sin (* 0.05 *draw-frame*))))))
-    (unless (= 0.0 dist)
-      (set-camera 0.1 (* 0.01 dist) dist 0.0 0.0 0.0)))|#
-  (set-camera 0.0 0.0 1.0 0.0 0.0 0.0)
-  (setf *pmat* (perspective-projection 20.0 0.1 122.0))
+  (set-camera 0.0 0.0 5.5 0.0 0.0 1.0)
+  (setf *vmat* (sb-cga:identity-matrix))
+  (setf *pmat* (sb-cga:identity-matrix))
+  (setf *pmat* (perspective-projection 90.0 0.1 122.0))
   (setf *scale-matrix*
-	(scale 0.2 0.2 0.2))
-  #|(setf *rotation-matrix*
-	(rotate -90.0 0.0 0.0 1.0))|#
+	(scale 1.5 1.5 1.5))
   (setf *rotation-matrix*
-	(rotate (mod (* 0.025 *draw-frame*) 360.0) 0.0 0.0 1.0))
-  #|(setf *rotation-matrix*
+	(rotate 45.0 -1.0 0.0 0.0))
+  (setf *rotation-matrix*
 	(sb-cga:matrix* *rotation-matrix*
-			(rotate (mod (* 0.025 *draw-frame*) 360.0) 0.0 1.0 0.0)))|#
+			(rotate (mod (* 0.25 *draw-frame*) 360.0) 0.0 0.0 1.0)))
   (update-world-transformation-matrix)  ;; update world's Translate/Scale/Rotate matrix
   (update-world-matrix)                 ;; update world matrix to be P*V*M
   (render-stuff renderer)

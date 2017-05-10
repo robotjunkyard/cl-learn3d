@@ -2,14 +2,9 @@
 
 (defparameter *vmat*
   (sb-cga:identity-matrix)
-  #|(look-at (sb-cga:normalize (sb-cga:vec 0.0 1.0 1.0))
-	   (sb-cga:vec 0.0 0.0 0.0)
-	   (sb-cga:vec 1.0 0.0 0.0))|#
   "World's view matrix; used to project vertices from world-space into view-space.")
 (defparameter *pmat*
   (sb-cga:identity-matrix)
-  ;;;(perspective-projection 90.0 0.5 40.0)
-  ;;;(ortho-projection 8.0 8.0 0.25 8.0)
   "World's projection matrix; used to project vertices from view-space into clip-space.")
 (defparameter *rotation-matrix*
   (sb-cga:identity-matrix)  "World's rotation matrix")
@@ -43,12 +38,26 @@
 		 0.0 0.0 1.0 z
 		 0.0 0.0 0.0 1.0))
 
-(defun rotate (r ux uy uz)
-  (declare (type single-float r ux uy uz))
-  (let ((rx (deg2rad ux))
-	(ry (deg2rad uy))
-	(rz (deg2rad uz)))
-    (axis-rotate (sb-cga:vec rx ry rz) r)))
+(defun rotate (angle ux uy uz)
+  (declare (type single-float angle ux uy uz))
+  (let* ((a (deg2rad angle))
+	 (c (cos a))
+	 (s (sin a))
+	 (m11 (+ (* ux ux (- 1.0 c)) c))
+	 (m12 (- (* ux uy (- 1.0 c)) (* uz s)))
+	 (m13 (+ (* ux uz (- 1.0 c)) (* uy s)))
+	 (m21 (+ (* uy ux (- 1.0 c)) (* uz s)))
+	 (m22 (+ (* uy uy (- 1.0 c)) c))
+	 (m23 (- (* uy uz (- 1.0 c)) (* ux s)))
+	 (m31 (- (* ux uz (- 1.0 c)) (* uy s)))
+	 (m32 (+ (* uy uz (- 1.0 c)) (* ux s)))
+	 (m33 (+ (* uz uz (- 1.0 c)) c)))
+    (declare (type single-float a c s m11 m12 m13 m21 m22 m23 m31 m32 m33))
+    (sb-cga:matrix m11 m12 m13 0.0
+		   m21 m22 m23 0.0
+		   m31 m32 m33 0.0
+		   0.0 0.0 0.0 1.0)
+    ))
 
 (defun scale (x y z)
   (declare (type single-float x y z))
