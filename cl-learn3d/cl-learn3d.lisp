@@ -42,11 +42,6 @@ the sdl2:with-init code."
 (defun setres (x y)
   (setf *x-res* x
 	*y-res* y))
-		
-#|(defun rotate ()
-  (setf *rotation-matrix*
-	(axis-rotate (sb-cga:normalize (sb-cga:vec 0.0 0.0 1.0))
-		     (mod (* 0.001 (sdl2:get-ticks)) 360.0))))|#
 
 (defun reset-world-rotation ()
   (setf *rotation-matrix* (sb-cga:identity-matrix)))
@@ -54,11 +49,10 @@ the sdl2:with-init code."
 (defun render-stuff (renderer)
   (sdl2:set-render-draw-color renderer 0 0 0 255)
   (sdl2:render-clear renderer)
-  ;;;; (rotate)
   (sdl2:set-render-draw-color renderer 64 127 255 255)
   (when *model*
     (draw-axes renderer)
-    ;;;; (sort-mesh-face-draw-order *model*)
+    (sort-mesh-face-draw-order *model* *world-matrix*)
     (sdl2:set-render-draw-color renderer 207 205 155 255)
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))
@@ -69,7 +63,7 @@ the sdl2:with-init code."
 	(look-at 
 	 (sb-cga:vec ex ey ez)
 	 (sb-cga:vec tx ty tz)
-	 (sb-cga:vec 0.0 0.0 1.0))
+	 (sb-cga:vec 0.0 1.0 0.0))
 
 	(aref *camera-eye* 0) ex
 	(aref *camera-eye* 1) ey
@@ -79,22 +73,25 @@ the sdl2:with-init code."
 	(aref *camera-target* 1) ty
 	(aref *camera-target* 2) tz
 
-	;;(*translation-matrix* (translate ex ey ez))
+	;; umm... hmm
+	;; *translation-matrix* (translate (- ex) (- ey) (- ez))
   ))
 
 (defun main-idle (renderer)
   #|(let ((dist (abs (* 1.0 (sin (* 0.05 *draw-frame*))))))
     (unless (= 0.0 dist)
       (set-camera 0.1 (* 0.01 dist) dist 0.0 0.0 0.0)))|#
-  (set-camera 0.0 0.2 0.9 0.0 0.0 0.0)
-  (setf *pmat* (perspective-projection 85.0 0.1 122.0))
+  (set-camera 0.0 0.0 1.0 0.0 0.0 0.0)
+  (setf *pmat* (perspective-projection 20.0 0.1 122.0))
   (setf *scale-matrix*
-	(scale 1.0 1.0 1.0))
+	(scale 0.2 0.2 0.2))
+  #|(setf *rotation-matrix*
+	(rotate -90.0 0.0 0.0 1.0))|#
   (setf *rotation-matrix*
-	(rotate 0.0 1.0 0.0 0.0))
-  (setf *rotation-matrix*
+	(rotate (mod (* 0.025 *draw-frame*) 360.0) 0.0 0.0 1.0))
+  #|(setf *rotation-matrix*
 	(sb-cga:matrix* *rotation-matrix*
-			(rotate (mod (* 0.025 *draw-frame*) 360.0) 0.0 0.0 1.0)))
+			(rotate (mod (* 0.025 *draw-frame*) 360.0) 0.0 1.0 0.0)))|#
   (update-world-transformation-matrix)  ;; update world's Translate/Scale/Rotate matrix
   (update-world-matrix)                 ;; update world matrix to be P*V*M
   (render-stuff renderer)

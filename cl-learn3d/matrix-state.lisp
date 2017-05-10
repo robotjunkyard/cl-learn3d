@@ -48,7 +48,7 @@
   (let ((rx (deg2rad ux))
 	(ry (deg2rad uy))
 	(rz (deg2rad uz)))
-  (axis-rotate (sb-cga:vec rx ry rz) r)))
+    (axis-rotate (sb-cga:vec rx ry rz) r)))
 
 (defun scale (x y z)
   (declare (type single-float x y z))
