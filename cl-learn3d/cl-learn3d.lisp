@@ -88,7 +88,7 @@ the sdl2:with-init code."
 	(rotate 45.0 -1.0 0.0 0.0))
   (setf *rotation-matrix*
 	(sb-cga:matrix* *rotation-matrix*
-			(rotate (mod (* 0.25 *draw-frame*) 360.0) 0.0 0.0 1.0)))
+			(rotate (mod (* 0.5 *draw-frame*) 360.0) 0.0 0.0 1.0)))
   (update-world-transformation-matrix)  ;; update world's Translate/Scale/Rotate matrix
   (update-world-matrix)                 ;; update world matrix to be P*V*M
   (render-stuff renderer)

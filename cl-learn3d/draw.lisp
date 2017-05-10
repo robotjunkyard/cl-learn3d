@@ -134,10 +134,30 @@
 	   )))))
   nil)
 
+#|(n      (sb-cga:cross-product (sb-cga:vec- v2 v1)
+					 (sb-cga:vec- v3 v1)))
+	   (p      (sb-cga:vec* (sb-cga:transform-point *camera-eye* tmat) -1.0))  ;;(sb-cga:vec- tv1 *camera-eye*))
+	   (v0-p   (sb-cga:normalize (sb-cga:vec- v1 p)))
+	   (v0-p.n (sb-cga:dot-product v0-p n))
+
+	   
+(n (sb-cga:cross-product (sb-cga:vec- tv2 tv1) (sb-cga:vec- tv3 tv1)))
+	   (negv1 (sb-cga:vec* tv1 -1.0))
+	   (negv1.n (sb-cga:dot-product negv1 n))|#
+
+(defun calculate-tri-normal (v1 v2 v3)
+  (declare (type vec3 v1 v2 v3)
+	   (dynamic-extent v1 v2 v3))
+  (let ((u (sb-cga:vec- v2 v1))
+	(v (sb-cga:vec- v3 v1)))
+    (declare (type vec3 u v)
+	     (dynamic-extent u v))
+    (sb-cga:cross-product u v)))
+   
 (defun draw-3d-triangle-* (x1 y1 z1 x2 y2 z2 x3 y3 z3 tmat
 			   renderer &key (fill t) (wireframe t)
 				      (color *default-triangle-color*)
-				      (cull-backfaces nil))
+				      (cull-backfaces t))
   (declare (type single-float x1 y1 x2 y2 x3 y3)
 	   (type mat4x4 tmat)
 	   (type boolean fill wireframe cull-backfaces)
@@ -151,15 +171,9 @@
 	 (tv3 (sb-cga:transform-point v3 tmat)) )
     (declare (type vec3 v1 v2 v3 tv1 tv2 tv3)
 	     (dynamic-extent v1 v2 v3 tv1 tv2 tv3))
-    (let* (#|(n (sb-cga:cross-product (sb-cga:vec- v2 v1)
-				    (sb-cga:vec- v3 v1)))
-	   (p (sb-cga:vec- tv1 *camera-eye*) tmat)
-	   (v0-p (sb-cga:vec- v1 p))
-	   (v0-p.n (sb-cga:dot-product v0-p n)))|#
-	   (n (sb-cga:cross-product (sb-cga:vec- tv2 tv1) (sb-cga:vec- tv3 tv1)))
-	   (negv1 (sb-cga:vec* tv1 -1.0))
-	   (negv1.n (sb-cga:dot-product negv1 n)))
-	(when (and cull-backfaces (>= negv1.n 0.0))
+    (let* ((normal (calculate-tri-normal tv1 tv2 tv3))
+	   (cv (sb-cga:vec- *camera-target* *camera-eye*)))
+	(when (and cull-backfaces (> (sb-cga:dot-product cv normal) 0))
 	  (return-from draw-3d-triangle-* nil))
       (let* ((tv1x (aref tv1 0))
 	     (tv1y (aref tv1 1))
