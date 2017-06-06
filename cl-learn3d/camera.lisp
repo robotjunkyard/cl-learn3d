@@ -46,3 +46,18 @@
      0.0   s       0.0     0.0
      0.0   0.0  (- (/ far (- far near)))   -1.0
      0.0   0.0  (- (/ (* far near) (- far near)))  0.0)))
+
+(defun frustum-projection (top bottom left right near far)
+  (declare (type single-float top bottom left right near far))
+  (let ((m11 (/ (* 2.0 near) (- right left)))
+	(m13 (/ (+ right left) (- right left)))
+	(m22 (/ (* 2.0 near) (- top bottom)))
+	(m23 (/ (+ top bottom) (- top bottom)))
+	(m33 (- (/ (+ far near) (- far near))))
+	(m34 (- (/ (* 2.0 near far) (- far near)))))
+    (declare (type single-float m11 m13 m22 m23 m33 m34))
+    (sb-cga:matrix
+     m11  0.0  m13  0.0
+     0.0  m22  m23  0.0
+     0.0  0.0  m33  m34
+     0.0  0.0 -1.0  0.0)))

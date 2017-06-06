@@ -3,13 +3,12 @@
 (in-package #:cl-learn3d)
 
 (defvar *model* nil)
-(defparameter *delay* 2.0)  ;; actual FPS = this / 60.0
+(defparameter *delay* 1.0)  ;; actual FPS = this / 60.0
 (defparameter *font* nil)
 (defparameter *draw-frame* 0)
 
 (defmacro with-main (&body body)
-  "Enables REPL access via UPDATE-SWANK in the main loop using SDL2. Wrap this around
-the sdl2:with-init code."
+  "Enables REPL access via UPDATE-SWANK in the main loop using SDL2. Wrap this around the sdl2:with-init code."
   ;;TODO: understand this. Without this wrapping the sdl:with-init the sdl thread
   ;; is an "Anonymous thread" (tested using sb-thread:*current-thread*), while applying
   ;; this makes *current-thread* the same as the one one when queried directly from the
@@ -34,11 +33,12 @@ the sdl2:with-init code."
               (swank::handle-requests connection t)))))
 
 (defparameter *axis-size* 4.0)
+(defparameter *fov* 90.0)
 
 (defparameter *x-res* 640)
 (defparameter *y-res* 480)
-(defparameter *x-res-float* 0.0)  ;;  these initialized by main
-(defparameter *y-res-float* 0.0)  ;;  " " " "
+(defparameter *x-res-float* (float *x-res*))
+(defparameter *y-res-float* (float *y-res*))
 (declaim (type uint16 *x-res* *y-res*)
 	 (type single-float *x-res-float* *y-res-float*))
 
@@ -60,11 +60,11 @@ the sdl2:with-init code."
     (draw-mesh *model* renderer))
   (sdl2:render-present renderer))
 
-(defun set-camera (ex ey ez tx ty tz &optional (fov 90.0))
+(defun set-camera (ex ey ez tx ty tz &key (fov *fov*))
   (declare (type single-float ex ey ez tx ty tz fov))
   (setf *vmat*
 	(look-at 
-	 (sb-cga:vec ex ey ez)
+	 (sb-cga:vec (+ ex) (+ ey) (+ ez))
 	 (sb-cga:vec tx ty tz)
 	 (sb-cga:vec 0.0 1.0 0.0))
 
@@ -77,23 +77,30 @@ the sdl2:with-init code."
 	(aref *camera-target* 2) tz
 
 	;; umm... hmm
-	*translation-matrix* (translate (- ex) (- ey) (- ez))
-  ))
+	;; *translation-matrix* (translate (- ex) (- ey) (- ez))
+
+	;; *pmat* (perspective-projection fov 0.1 122.0)
+	))
 
 (defparameter *scale* 0.25)
 
 (defun main-idle (renderer)
-  (set-camera 0.0 0.0 5.5 0.0 0.0 1.0)
   (setf *vmat* (sb-cga:identity-matrix))
-  (setf *pmat* (sb-cga:identity-matrix))
-  (setf *pmat* (perspective-projection 90.0 0.1 122.0))
+  ;; (setf *pmat* (sb-cga:identity-matrix))
+  
+  (set-camera 0.0 0.0 1.0 0.0 0.0 0.0 :fov *fov*)
+  ;;(setf *pmat*
+  ;;  (frustum-projection 0.2 -0.2 -0.5 0.5 0.2 120.0))
+  (setf *pmat*
+	(perspective-projection 120.0 0.01 100.0))
   (setf *scale-matrix*
 	(scale *scale* *scale* *scale*))
+  (setf *rotation-matrix* (sb-cga:identity-matrix))
   (setf *rotation-matrix*
-	(rotate 45.0 -1.0 0.0 0.0))
+	(rotate (mod (* 0.10 *draw-frame*) 360.0) 0.0 0.0 1.0))
   (setf *rotation-matrix*
 	(sb-cga:matrix* *rotation-matrix*
-			(rotate (mod (* 0.25 *draw-frame*) 360.0) 0.0 0.0 1.0)))
+			(rotate (mod (* 0.25 *draw-frame*) 360.0) 1.0 0.0 0.0)))
   (update-world-transformation-matrix)  ;; update world's Translate/Scale/Rotate matrix
   (update-world-matrix)                 ;; update world matrix to be P*V*M
   (render-stuff renderer)
