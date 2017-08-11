@@ -10,7 +10,7 @@
   (with-open-file (in filename)
     (loop for line = (read-line in nil 'eof)
        until (eq line 'eof)
-       collect line)))
+       collect (string-trim '(#\Return #\Newline) line))))
 
 ;;; from a Kent Pitman usenet post, though I lost the URL
 (defmacro case-using (pred-exp exp &body clauses)

@@ -115,10 +115,10 @@
 		0.0 0.0 0.0)
     (setq *model* (load-model "spaceship"))
     (setf *world-matrix* (sb-cga:identity-matrix))
-    (sdl2:with-init (:everything)
+    (sdl2:with-init (:video)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
-	(sdl2:with-renderer (renderer win :flags '(:accelerated :presentvsync))
+	(sdl2:with-renderer (renderer win #| :flags '(:accelerated :presentvsync) |#)
 	  (sdl2:with-event-loop (:method :poll)
 	    (:idle
 	     ()
