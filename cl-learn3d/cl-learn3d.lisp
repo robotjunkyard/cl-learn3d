@@ -118,6 +118,9 @@
     (sdl2:with-init (:video)
       (sdl2:with-window (win :title "Learn3D" :flags '(:shown)
 			     :w *x-res* :h *y-res*)
+	;; pffft, for some stupid reason, these two lines needed to display properly in Windows
+#+win32	(sdl2:hide-window win)
+#+win32	(sdl2:show-window win)
 	(sdl2:with-renderer (renderer win #| :flags '(:accelerated :presentvsync) |#)
 	  (sdl2:with-event-loop (:method :poll)
 	    (:idle
