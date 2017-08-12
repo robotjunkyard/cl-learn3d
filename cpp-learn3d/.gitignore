@@ -1,0 +1,16 @@
+*.user
+*.filters
+bin/*
+obj/*
+/.vs
+/x64
+*.depend
+*.layout
+.clang-format*
+*.o
+*.bak
+*.cpp#
+*.obj
+cpp-learn3d.exe
+/Debug
+/Release
