@@ -1,6 +1,8 @@
 #pragma once
 #include "Vec.hpp"
 
+const float pi = 3.1415926535897932384626433f;
+
 struct Mat {
     Mat()
         : m11(1.0f)
@@ -160,6 +162,36 @@ struct Mat {
             0.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 0.0,
             0.0, 0.0, 0.0, 0.0);
+    }
+
+    static Mat rotationMatrix(float angle, float ux, float uy, float uz)
+    {
+        const float a = angle * (pi / 180.0f),
+                    c = cos(a),
+                    s = sin(a),
+                    omcosa = 1.0f - c;
+        const float m11 = (ux * ux * omcosa) + c,
+                    m12 = (ux * uy * omcosa) - (uz * s),
+                    m13 = (ux * uz * omcosa) + (uy * s),
+                    m21 = (uy * ux * omcosa) + (uz * s),
+                    m22 = (uy * uy * omcosa) + c,
+                    m23 = (uy * uz * omcosa) - (ux * s),
+                    m31 = (ux * uz * omcosa) - (uy * s),
+                    m32 = (uy * uz * omcosa) + (ux * s),
+                    m33 = (uz * uz * omcosa) + c;
+
+        return Mat(m11, m12, m13, 0.0f,
+            m21, m22, m23, 0.0f,
+            m31, m32, m33, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
+    }
+
+    static Mat scaleMatrix(float x, float y, float z)
+    {
+        return Mat(x, 0.0f, 0.0f, 0.0f,
+            0.0f, y, 0.0f, 0.0f,
+            0.0f, 0.0f, z, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f);
     }
 
     void print() const;

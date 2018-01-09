@@ -1,7 +1,5 @@
 #pragma once
 
-const float pi = 3.1415926535897932384626433f;
-
 #include "Mat.hpp"
 #include "Vec.hpp"
 
@@ -29,7 +27,7 @@ public:
         , _xres(xres)
         , _yres(yres)
     {
-        float aspectratio = (float)xres / (float)yres;
+        // float aspectratio = (float)xres / (float)yres;
         lookAt(_origin, _target, _up);
         setPerspectiveProjection(fov, near, far);
     }

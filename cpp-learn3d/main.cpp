@@ -26,6 +26,8 @@ Palette make_db32_Palette();
 
 int main()
 {
+    Vec3 ctest = Vec3::cross(Vec3(1.0, 2.0, 3.0), Vec3(50.0, 10.0, 5.0));
+
     Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(0.0f, 0.0f, 1.0f),

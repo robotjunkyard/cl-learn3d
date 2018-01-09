@@ -148,7 +148,7 @@ struct Vec3 {
 
     static Vec3 cross(const Vec3& a, const Vec3& b)
     {
-        const float cx = (a.x * b.z) - (a.z * b.y);
+        const float cx = (a.y * b.z) - (a.z * b.y);
         const float cy = (a.z * b.x) - (a.x * b.z);
         const float cz = (a.x * b.y) - (a.y * b.x);
         return Vec3(cx, cy, cz);

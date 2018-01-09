@@ -25,7 +25,9 @@ void drawFlat3DTriangle(Canvas& canvas, byte color,
 
 void drawMesh(Canvas& canvas, const Camera& camera, const Mesh& mesh)
 {
-    const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix();
+    static float rot = 0.0f;
+    rot += 2.0f;
+    const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix() * Mat::rotationMatrix(rot, 0.0f, 1.0f, 0.0f) * Mat::scaleMatrix(0.2, 0.2, 0.2);
 
     // **HUGE** TODO: re-impl. SORT-MESH-FACE-DRAW-ORDER, which in CL-LEARN3D
     // done w/ a customized version of quicksort that took a predicate
@@ -34,7 +36,8 @@ void drawMesh(Canvas& canvas, const Camera& camera, const Mesh& mesh)
     for (int faceNum = 0; faceNum < mesh.getFaces().size(); faceNum++) {
         // another less important but still necessary TODO: materials!
         Vec3 v0, v1, v2;
+        byte color = 2 + (faceNum % 30);
         mesh.getMeshFaceVertices(faceNum, v0, v1, v2);
-        drawFlat3DTriangle(canvas, 1, v0, v1, v2, worldMatrix);
+        drawFlat3DTriangle(canvas, color, v0, v1, v2, worldMatrix);
     }
 }
