@@ -26,22 +26,6 @@ Palette make_db32_Palette();
 
 int main()
 {
-    Mat testmat1(0.3, 0.1, 0.75, 0.22,
-        0.98, 2.25, 5.0, 1.2,
-        0.0, 0.1, 0.2, 0.3,
-        0.4, 0.5, 0.6, 0.7);
-    Mat testmat2(20.0, 10.0, 5.0, 2.5,
-        100.0, 50.0, 25.0, 10.0,
-        10.0, 20.0, 30.0, 40.0,
-        1.0, 2.0, 3.0, 4.0);
-
-    Mat t1mt2 = testmat1 * testmat2;
-
-    // oh fuck this is horribly wrong.  fix in next commit
-    t1mt2.print();
-
-    return 0;
-
     Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(0.0f, 0.0f, 1.0f),
