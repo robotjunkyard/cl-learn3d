@@ -30,7 +30,7 @@ int main()
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(3.0f, 3.0f, 0.0f),
         Vec3(0.0f, 0.0f, 0.0f),
-        Vec3(0.0f, 1.0f, 0.0f),
+        Vec3(0.0f, 0.0f, 1.0f),
         90.0f,
         1.0f, // near
         80.0f); // far
@@ -112,12 +112,16 @@ int main()
             // trying to troubleshoot LookAt bullshit
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
-            float eyedist = 32 + 32.0 * cos(eyedelta);
-            printf("eyedist %f\n", eyedist);
 
-            camera.lookAt(Vec3(0.0f, 64.0f, eyedist), Vec3(0.0, 0.0, 0.0),
-                Vec3(0.0, 1.0, 0.0));
-            camera.setPerspectiveProjection(120.0, 0.1, 100.0);
+            //float eyedist = 32 + 128.0 * sin(eyedelta);
+            float eyex = 32 * sin(eyedelta),
+                  eyey = 32 * cos(eyedelta),
+                  eyez = 16 * sin(eyedelta);
+
+            camera.lookAt(Vec3(eyex, eyey, eyez),
+                Vec3(0.0, 0.0, 0.0),
+                Vec3(0.0, 0.0, -1.0)); // INVESTIGATE: exported model as Z-Up, but need -1 Z here for it to show proper orientation
+            camera.setPerspectiveProjection(90.0, 0.1, 100.0);
         }
 
         drawMesh(canvas, camera, mesh);

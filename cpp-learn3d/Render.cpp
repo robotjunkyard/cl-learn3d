@@ -11,7 +11,7 @@ void drawFlat3DTriangle(Canvas& canvas,
     //rot += 0.000025f;
     const Quat rotQuat = Quat::fromAxisRotation(Vec3(0.5, 0.0, 1.0), rot);
     const Mat rotMat = rotQuat.toMatrix();*/
-    const Mat scMat = Mat::scaleMatrix(0.2, 0.2, 0.2);
+    //const Mat scMat = Mat::scaleMatrix(0.2, 0.2, 0.2);
 
     // Perf TODO: probably better to do this in one clustered batch for all world geometry
     // to a buffer full of screen-space triangles, and then actually draw from that buffer
@@ -30,8 +30,7 @@ void drawFlat3DTriangle(Canvas& canvas,
               sy2 = static_cast<int>((1.0f - tv2.y) * h * 0.5),
               sx3 = static_cast<int>((1.0f + tv3.x) * w * 0.5),
               sy3 = static_cast<int>((1.0f - tv3.y) * h * 0.5);*/
-    const float cnear = 0.00001;
-    camera.getNear();
+    const float cnear = camera.getNear();
 
     const int sx1 = (w * 0.5f) + (tv1.x * w * 0.5f / std::max(tv1.z, cnear)),
               sy1 = (h * 0.5f) + (tv1.y * h * 0.5f / std::max(tv1.z, cnear)),
@@ -46,7 +45,7 @@ void drawFlat3DTriangle(Canvas& canvas,
 
 void drawMesh(Canvas& canvas, const Camera& camera, const Mesh& mesh)
 {
-    const Mat worldMatrix = camera.getViewMatrix() * camera.getProjMatrix();
+    const Mat worldMatrix = Mat::scaleMatrix(0.02) * camera.getViewMatrix() * camera.getProjMatrix();
 
     // **HUGE** TODO: re-impl. SORT-MESH-FACE-DRAW-ORDER, which in CL-LEARN3D
     // done w/ a customized version of quicksort that took a predicate
