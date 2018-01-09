@@ -7,8 +7,11 @@
 #endif
 
 #include "Bitmap.hpp"
+#include "Camera.hpp"
 #include "CanvasDef.hpp"
 #include "Mat.hpp"
+#include "Mesh.hpp"
+#include "Render.hpp"
 #include "UI.hpp"
 #include "canvas8.hpp"
 #include <cstdio>
@@ -23,6 +26,27 @@ Palette make_db32_Palette();
 
 int main()
 {
+    Mat testmat1(0.3, 0.1, 0.75, 0.22,
+        0.98, 2.25, 5.0, 1.2,
+        0.0, 0.1, 0.2, 0.3,
+        0.4, 0.5, 0.6, 0.7);
+    Mat testmat2(20.0, 10.0, 5.0, 2.5,
+        100.0, 50.0, 25.0, 10.0,
+        10.0, 20.0, 30.0, 40.0,
+        1.0, 2.0, 3.0, 4.0);
+
+    Mat t1mt2 = testmat1 * testmat2;
+
+    // oh fuck this is horribly wrong.  fix in next commit
+    t1mt2.print();
+
+    return 0;
+
+    Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
+    Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
+        Vec3(0.0f, 0.0f, 1.0f),
+        Vec3(0.0f, 0.0f, 0.0f));
+
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
     UI ui(canvas);
@@ -77,8 +101,10 @@ int main()
                 paused = !paused;
         }
 
-        if (!paused) {
-            // DO ALL THE DRAWING TO CANVAS HERE
+        // DO ALL THE DRAWING TO CANVAS HERE
+        canvas.clear();
+        drawMesh(canvas, camera, mesh);
+        /*if (!paused) {
             Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
                 windowWidth,
                 windowHeight,
@@ -92,7 +118,7 @@ int main()
             canvas.drawTriangle(cx - (rand() % 80), cy - (rand() % 80),
                 cx - (rand() % 80), cy + (rand() % 80),
                 cx + (rand() % 80), cy + (rand() % 80), 6);
-        }
+        }*/
 
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
         SDL_RenderCopy(renderer, texture, NULL, NULL);

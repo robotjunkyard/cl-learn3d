@@ -2,6 +2,11 @@
 
 #include <cmath>
 
+inline bool feq(float a, float b, float epsilon = 1e-6f)
+{
+    return fabs(a - b) < epsilon;
+}
+
 struct Vec4 {
     Vec4()
         : x(1.0f)
@@ -100,13 +105,18 @@ struct Vec4 {
     Vec4& normalize()
     {
         const float m = mag();
-        if (m != 0.0f) { // TODO: use epsilon-compare
+        if (feq(m, 0.0f)) {
             x /= m;
             y /= m;
             z /= m;
             w /= m;
         }
         return *this;
+    }
+
+    bool operator==(const Vec4& other) const
+    {
+        return feq(x, other.x) && feq(y, other.y) && feq(z, other.z) && feq(w, other.w);
     }
 
     float x, y, z, w;
@@ -197,6 +207,11 @@ struct Vec3 {
         y *= c;
         z *= c;
         return *this;
+    }
+
+    bool operator==(const Vec3& other) const
+    {
+        return feq(x, other.x) && feq(y, other.y) && feq(z, other.z);
     }
 
     float mag() const

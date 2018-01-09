@@ -2,6 +2,14 @@
 #include <tuple>
 #include <utility>
 
+#undef PRINT_TRIANGLE_DEBUG
+
+#ifdef PRINT_TRIANGLE_DEBUG
+#define TRIDBGMSG(fmt, ...) printf(fmt, __VA_ARGS__)
+#else
+#define TRIDBGMSG(...)
+#endif
+
 void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
 {
     for (int y = 0; y < height(); y++) {
@@ -135,9 +143,9 @@ void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
 
 void Canvas::drawHorizLine(int x1, int y, int x2, byte color)
 {
-    printf("  drawHLine(%d to %d on %d) : ", x1, x2, y);
+    TRIDBGMSG("  drawHLine(%d to %d on %d) : ", x1, x2, y);
     if ((y < 0) || (y >= height())) {
-        printf("FAIL\n");
+        TRIDBGMSG("FAIL\n");
         return;
     }
 
@@ -145,13 +153,13 @@ void Canvas::drawHorizLine(int x1, int y, int x2, byte color)
         ux = std::max(x1, x2);
 
     if ((ux < 0) || (lx >= width())) {
-        printf("FAIL\n");
+        TRIDBGMSG("FAIL\n");
         return;
     }
 
     for (int xi = std::max(0, lx); xi <= std::min(ux, width() - 1); xi++)
         this->setPixel(xi, y, color);
-    printf("OK\n");
+    TRIDBGMSG("OK\n");
 }
 
 void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color)
@@ -167,7 +175,7 @@ void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte c
     if (midy > btmy)
         swap2pair(midx, btmx, midy, btmy);
 
-    printf("--- tri (%d, %d)-(%d, %d)-(%d, %d) ---\n", topx, topy, midx, midy, btmx, btmy);
+    TRIDBGMSG("--- tri (%d, %d)-(%d, %d)-(%d, %d) ---\n", topx, topy, midx, midy, btmx, btmy);
 
     const int x_mid_sub_top = midx - topx,
               x_btm_sub_top = btmx - topx,
@@ -176,8 +184,8 @@ void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte c
               y_btm_sub_top = btmy - topy,
               y_btm_sub_mid = btmy - midy;
 
-    if (0 == y_btm_sub_top) {
-        printf("Tri FAIL(*)\n");
+    if ((0 == y_btm_sub_top) || (btmy < 0) || (topy >= height())) {
+        TRIDBGMSG("Tri FAIL(*)\n");
         return;
     }
 
@@ -191,9 +199,9 @@ void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte c
     }
 
     const float dupper = static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top);
-    printf("UPPER:  dupper = %f\n", dupper);
+    TRIDBGMSG("UPPER:  dupper = %f\n", dupper);
     // draw upper sub-triangle
-    for (int yi = topy; yi < midy; yi++) {
+    for (int yi = topy; yi < std::min(midy, height()); yi++) {
         drawHorizLine(static_cast<int>(sx0), yi, static_cast<int>(sx1), color);
         sx0 += dupper;
         sx1 += dlong;
@@ -202,11 +210,11 @@ void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte c
     // draw lower sub-triangle
 draw_lower:
     if (0 == y_btm_sub_mid) {
-        printf("Tri OK(U)\n");
+        TRIDBGMSG("Tri OK(U)\n");
         return; // no need to draw lower sub-triangle
     }
     const float dlower = static_cast<float>(x_btm_sub_mid) / static_cast<float>(y_btm_sub_mid);
-    printf("LOWER:  dlower = %f\n", dlower);
+    TRIDBGMSG("LOWER:  dlower = %f\n", dlower);
     sx0 = static_cast<float>(midx);
     for (int yi = midy; yi < btmy; yi++) {
         drawHorizLine(static_cast<int>(sx0), yi, static_cast<int>(sx1), color);
@@ -214,7 +222,7 @@ draw_lower:
         sx1 += dlong;
     }
 
-    printf("Tri OK\n");
+    TRIDBGMSG("Tri OK\n");
 }
 
 void Palette::swapRedBlue()
