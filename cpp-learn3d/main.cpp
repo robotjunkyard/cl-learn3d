@@ -28,7 +28,7 @@ Palette make_db32_Palette();
 int main()
 {
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
-        Vec3(4.0f, 3.0f, 3.0f),
+        Vec3(3.0f, 3.0f, 0.0f),
         Vec3(0.0f, 0.0f, 0.0f),
         Vec3(0.0f, 1.0f, 0.0f),
         90.0f,
@@ -101,6 +101,25 @@ int main()
 
         int cx = canvasMousePos.first,
             cy = canvasMousePos.second;
+
+        {
+            // tests FOV
+            /*static float fovdelta = 0.0f;
+            fovdelta += 0.01f;
+            float fov = 90 + 80 * sin(fovdelta);
+            printf("fov = %f\n", fov);*/
+
+            // trying to troubleshoot LookAt bullshit
+            static float eyedelta = 0.0f;
+            eyedelta += 0.01f;
+            float eyedist = 32 + 32.0 * cos(eyedelta);
+            printf("eyedist %f\n", eyedist);
+
+            camera.lookAt(Vec3(0.0f, 64.0f, eyedist), Vec3(0.0, 0.0, 0.0),
+                Vec3(0.0, 1.0, 0.0));
+            camera.setPerspectiveProjection(120.0, 0.1, 100.0);
+        }
+
         drawMesh(canvas, camera, mesh);
 
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM

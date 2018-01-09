@@ -7,7 +7,8 @@ inline bool feq(float a, float b, float epsilon = 1e-6f)
     return fabs(a - b) < epsilon;
 }
 
-struct Vec4 {
+class Vec4 {
+public:
     Vec4()
         : x(1.0f)
         , y(0.0f)
@@ -79,13 +80,9 @@ struct Vec4 {
         return *this;
     }
 
-    Vec4& operator-()
+    Vec4 operator-() const
     {
-        x = -x;
-        y = -y;
-        z = -z;
-        w = -w;
-        return *this;
+        return Vec4(-x, -y, -z, -w);
     }
 
     Vec4& operator*=(const float c)
@@ -122,7 +119,8 @@ struct Vec4 {
     float x, y, z, w;
 };
 
-struct Vec3 {
+class Vec3 {
+public:
     Vec3()
         : x(1.0f)
         , y(0.0f)
@@ -193,12 +191,9 @@ struct Vec3 {
         return *this;
     }
 
-    Vec3& operator-()
+    Vec3 operator-() const
     {
-        x = -x;
-        y = -y;
-        z = -z;
-        return *this;
+        return Vec3(-x, -y, -z);
     }
 
     Vec3& operator*=(const float c)

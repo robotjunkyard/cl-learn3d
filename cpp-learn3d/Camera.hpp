@@ -17,7 +17,7 @@ public:
     // and that can always be changed later
     Camera(int xres, int yres,
         const Vec3& origin, const Vec3& target, const Vec3& up = Vec3(0.0f, 1.0f, 0.0f),
-        float fov = 90.0f, float near = 0.5f, float far = 100.0f)
+        float fov = 120.0f, float near = 0.5f, float far = 100.0f)
         : _origin(origin)
         , _target(target)
         , _up(up)
@@ -36,7 +36,7 @@ public:
     {
         const float aspectratio = (float)_xres / (float)_yres;
         const float s = tan((fov / 2.0f) * (pi / 180.0f)); // remember pi * 180 converts (fov/2)° to radians
-        const float j = (-(near + far)) / (far - near);
+        const float j = (-near - far) / (far - near);
         const float jj = 2.0f * far * near / (far - near);
 
         _projMatrix

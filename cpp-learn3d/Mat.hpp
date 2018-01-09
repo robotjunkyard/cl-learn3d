@@ -194,6 +194,11 @@ struct Mat {
             0.0f, 0.0f, 0.0f, 1.0f);
     }
 
+    static Mat scaleMatrix(float scalar)
+    {
+        return scaleMatrix(scalar, scalar, scalar);
+    }
+
     void print() const;
 
     float m11, m12, m13, m14,
