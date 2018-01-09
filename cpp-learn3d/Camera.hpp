@@ -44,6 +44,12 @@ public:
                 0.0f, 1.0f / s, 0.0f, 0.0f,
                 0.0f, 0.0f, j, jj,
                 0.0f, 0.0f, 1.0f, 0.0f);
+
+        /*_projMatrix
+            = Mat(1.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 1.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, j, jj,
+                0.0f, 0.0f, 1.0f, 0.0f);*/
         _fov = fov;
         _near = near;
         _far = far;
@@ -74,5 +80,20 @@ public:
     const Vec3& getUp() const
     {
         return _up;
+    }
+
+    float getNear() const
+    {
+        return _near;
+    }
+
+    float getFar() const
+    {
+        return _far;
+    }
+
+    float getFOV() const
+    {
+        return _fov;
     }
 };

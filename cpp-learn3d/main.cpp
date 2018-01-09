@@ -27,13 +27,15 @@ Palette make_db32_Palette();
 
 int main()
 {
-    int cx = 0, cy = 0; // mouse cursor screen coord
-    float h = 1.0f;
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
-        Vec3(0.0f, 0.0f, 1.0f),
-        Vec3(0.0f, 0.0f, 0.0f));
+        Vec3(4.0f, 3.0f, 3.0f),
+        Vec3(0.0f, 0.0f, 0.0f),
+        Vec3(0.0f, 1.0f, 0.0f),
+        90.0f,
+        1.0f, // near
+        80.0f); // far
 
-    Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
+    Mesh mesh = Mesh::loadMesh("models/unitcubes.obj");
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -88,11 +90,6 @@ int main()
             if ((SDL_KEYDOWN == event.type) && (SDL_SCANCODE_SPACE == event.key.keysym.scancode))
                 paused = !paused;
         }
-
-        h += 0.05;
-        float height = sin(h);
-        camera.lookAt(Vec3(0.0f, 0.0f, height), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f));
-        printf("%f\n", height);
 
         // DO ALL THE DRAWING TO CANVAS HERE
         canvas.clear();

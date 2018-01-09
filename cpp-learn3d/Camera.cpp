@@ -3,8 +3,8 @@
 const Mat& Camera::lookAt(const Vec3& origin, const Vec3& target, const Vec3& up)
 {
     Vec3 vz = (origin - target).normalize(),
-         vx = Vec3::cross(up, vz),
-         vy = Vec3::cross(vz, vx);
+         vx = Vec3::cross(up, vz).normalize(),
+         vy = Vec3::cross(vz, vx).normalize();
     float dotxin = -(Vec3::dot(vx, origin)),
           dotyin = -(Vec3::dot(vy, origin)),
           dotzin = -(Vec3::dot(vz, origin));
