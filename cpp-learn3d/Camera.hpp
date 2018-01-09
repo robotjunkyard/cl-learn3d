@@ -34,7 +34,7 @@ public:
 
     const Mat& setPerspectiveProjection(float fov, float near, float far)
     {
-        float aspectratio = (float)_xres / (float)_yres;
+        const float aspectratio = (float)_xres / (float)_yres;
         const float s = tan((fov / 2.0f) * (pi / 180.0f)); // remember pi * 180 converts (fov/2)° to radians
         const float j = (-(near + far)) / (far - near);
         const float jj = 2.0f * far * near / (far - near);

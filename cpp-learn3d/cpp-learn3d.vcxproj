@@ -151,6 +151,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mat.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Quat.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="UI.cpp" />
     <ClCompile Include="Vec.cpp" />
@@ -162,6 +163,7 @@
     <ClInclude Include="CanvasDef.hpp" />
     <ClInclude Include="Mat.hpp" />
     <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="Quat.hpp" />
     <ClInclude Include="Render.hpp" />
     <ClInclude Include="UI.hpp" />
     <ClInclude Include="Vec.hpp" />

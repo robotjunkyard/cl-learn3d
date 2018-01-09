@@ -11,6 +11,7 @@
 #include "CanvasDef.hpp"
 #include "Mat.hpp"
 #include "Mesh.hpp"
+#include "Quat.hpp"
 #include "Render.hpp"
 #include "UI.hpp"
 #include "canvas8.hpp"
@@ -26,12 +27,13 @@ Palette make_db32_Palette();
 
 int main()
 {
-    Vec3 ctest = Vec3::cross(Vec3(1.0, 2.0, 3.0), Vec3(50.0, 10.0, 5.0));
-
-    Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
+    int cx = 0, cy = 0; // mouse cursor screen coord
+    float h = 1.0f;
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(0.0f, 0.0f, 1.0f),
         Vec3(0.0f, 0.0f, 0.0f));
+
+    Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -87,24 +89,22 @@ int main()
                 paused = !paused;
         }
 
+        h += 0.05;
+        float height = sin(h);
+        camera.lookAt(Vec3(0.0f, 0.0f, height), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f));
+        printf("%f\n", height);
+
         // DO ALL THE DRAWING TO CANVAS HERE
         canvas.clear();
-        drawMesh(canvas, camera, mesh);
-        /*if (!paused) {
-            Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
-                windowWidth,
-                windowHeight,
-                CANVAS_WIDTH,
-                CANVAS_HEIGHT);
+        Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
+            windowWidth,
+            windowHeight,
+            CANVAS_WIDTH,
+            CANVAS_HEIGHT);
 
-            canvas.clear();
-            // canvas.setPixel(canvasMousePos.first, canvasMousePos.second, 1);
-            int cx = canvasMousePos.first,
-                cy = canvasMousePos.second;
-            canvas.drawTriangle(cx - (rand() % 80), cy - (rand() % 80),
-                cx - (rand() % 80), cy + (rand() % 80),
-                cx + (rand() % 80), cy + (rand() % 80), 6);
-        }*/
+        int cx = canvasMousePos.first,
+            cy = canvasMousePos.second;
+        drawMesh(canvas, camera, mesh);
 
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
         SDL_RenderCopy(renderer, texture, NULL, NULL);
