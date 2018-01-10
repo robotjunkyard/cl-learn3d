@@ -5,10 +5,10 @@
 
 class Camera {
 private:
-    Mat _viewMatrix, _projMatrix;
-    Vec3 _origin, _target, _up;
-    float _fov, _near, _far; // , _aspectratio;
-    int _xres, _yres;
+    Mat m_viewMatrix, m_projMatrix;
+    Vec3 m_origin, m_target, m_up;
+    float m_fov, m_near, m_far; // , _aspectratio;
+    int m_xres, m_yres;
 
 public:
     const Mat& lookAt(const Vec3& origin, const Vec3& target, const Vec3& up);
@@ -18,23 +18,23 @@ public:
     Camera(int xres, int yres,
         const Vec3& origin, const Vec3& target, const Vec3& up = Vec3(0.0f, 1.0f, 0.0f),
         float fov = 120.0f, float near = 0.5f, float far = 100.0f)
-        : _origin(origin)
-        , _target(target)
-        , _up(up)
-        , _fov(fov)
-        , _near(near)
-        , _far(far)
-        , _xres(xres)
-        , _yres(yres)
+        : m_origin(origin)
+        , m_target(target)
+        , m_up(up)
+        , m_fov(fov)
+        , m_near(near)
+        , m_far(far)
+        , m_xres(xres)
+        , m_yres(yres)
     {
         // float aspectratio = (float)xres / (float)yres;
-        lookAt(_origin, _target, _up);
+        lookAt(m_origin, m_target, m_up);
         setPerspectiveProjection(fov, near, far);
     }
 
     const Mat& setPerspectiveProjection(float fov, float near, float far)
     {
-        const float aspectratio = (float)_xres / (float)_yres;
+        const float aspectratio = (float)m_xres / (float)m_yres;
         const float s = tan((fov / 2.0f) * (pi / 180.0f)); // remember pi * 180 converts (fov/2)° to radians
 
         /*const float j = (-near - far) / (far - near);
@@ -42,7 +42,7 @@ public:
         const float j = -far / (far - near);
         const float jj = -(far * near) / (far - near);
 
-        _projMatrix
+        m_projMatrix
             = Mat(1.0f / (s * aspectratio), 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f / s, 0.0f, 0.0f,
                 0.0f, 0.0f, j, 1.0,
@@ -64,50 +64,50 @@ public:
                 0.0f, s * aspectratio, 0.0f, 0.0f,
                 0.0f, 0.0f, j, 1.0,
                 0.0f, 0.0f, jj, 0.0f);*/
-        _fov = fov;
-        _near = near;
-        _far = far;
+        m_fov = fov;
+        m_near = near;
+        m_far = far;
 
-        return _projMatrix;
+        return m_projMatrix;
     }
 
     const Mat& getViewMatrix() const
     {
-        return _viewMatrix;
+        return m_viewMatrix;
     }
 
     const Mat& getProjMatrix() const
     {
-        return _projMatrix;
+        return m_projMatrix;
     }
 
     const Vec3& getOrigin() const
     {
-        return _origin;
+        return m_origin;
     }
 
     const Vec3& getTarget() const
     {
-        return _target;
+        return m_target;
     }
 
     const Vec3& getUp() const
     {
-        return _up;
+        return m_up;
     }
 
     float getNear() const
     {
-        return _near;
+        return m_near;
     }
 
     float getFar() const
     {
-        return _far;
+        return m_far;
     }
 
     float getFOV() const
     {
-        return _fov;
+        return m_fov;
     }
 };

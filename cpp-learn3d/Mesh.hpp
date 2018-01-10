@@ -33,11 +33,15 @@ private:
 
 class Mesh {
 public:
-    //static std::shared_ptr<Mesh> loadMesh(std::string filename);
     static Mesh loadMesh(std::string filename);
     const std::vector<mesh_face_t>& getFaces() const
     {
         return m_faces;
+    }
+
+    std::vector<mesh_face_t>& getFaceSortBuffer()
+    {
+        return m_facesortbuffer;
     }
 
     const std::vector<Vec3>& getVertices() const
@@ -52,8 +56,8 @@ public:
                   vidx1 = face.getV1(),
                   vidx2 = face.getV2();
         const Vec3 &v0 = m_vertices[vidx0],
-                   v1 = m_vertices[vidx1],
-                   v2 = m_vertices[vidx2];
+                   &v1 = m_vertices[vidx1],
+                   &v2 = m_vertices[vidx2];
         ov0 = v0;
         ov1 = v1;
         ov2 = v2;
@@ -63,9 +67,11 @@ private:
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo)
         : m_vertices(vertexdata)
         , m_faces(faceinfo)
+        , m_facesortbuffer(faceinfo)
     {
     }
 
     const std::vector<Vec3> m_vertices;
     const std::vector<mesh_face_t> m_faces;
+    std::vector<mesh_face_t> m_facesortbuffer;
 };

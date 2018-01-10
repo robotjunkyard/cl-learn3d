@@ -10,23 +10,23 @@
 class Bitmap {
 public:
     Bitmap(int width, int height, const char* const filename)
-        : _pixels(new byte[width * height])
-        , _width(width)
-        , _height(height)
+        : m_pixels(new byte[width * height])
+        , m_width(width)
+        , m_height(height)
     {
-        if (nullptr == _pixels)
+        if (nullptr == m_pixels)
             throw "Failed to allocate pixels.";
 
         if (filename) {
             std::string fn = "gfx/" + std::string(filename);
             FILE* fp = fopen(fn.c_str(), "r");
             if (fp) {
-                fread(_pixels, 1, width * height, fp);
+                fread(m_pixels, 1, width * height, fp);
                 fclose(fp);
 
                 for (int i = 0; i < width * height; i++)
-                    if (0 == _pixels[i]) {
-                        _hasZeroPixel = true;
+                    if (0 == m_pixels[i]) {
+                        m_hasZeroPixel = true;
                         break;
                     }
             } else {
@@ -34,51 +34,51 @@ public:
                 throw "File not found.";
             }
         } else {
-            memset(_pixels, 0x00, width * height);
-            _hasZeroPixel = true;
+            memset(m_pixels, 0x00, width * height);
+            m_hasZeroPixel = true;
         }
     }
 
     Bitmap(int width, int height, byte* const memloc, bool copyPixels = false)
-        : _pixels((copyPixels) ? new byte[width * height] : memloc)
-        , _width(width)
-        , _height(height)
+        : m_pixels((copyPixels) ? new byte[width * height] : memloc)
+        , m_width(width)
+        , m_height(height)
     {
         // printf("initializing Bitmap: [%p --> %p]\n", memloc, _pixels);
-        if (_pixels && copyPixels) {
+        if (m_pixels && copyPixels) {
             //			printf("copying from memloc %p into new memloc %p\n", memloc);
-            memcpy(_pixels, memloc, width * height);
+            memcpy(m_pixels, memloc, width * height);
         }
 
-        _werePixelsCopied = copyPixels;
+        m_werePixelsCopied = copyPixels;
     }
 
     //! Copy ctor
     Bitmap(const Bitmap& other)
-        : _pixels(new byte[other._width * other._height])
-        , _width(other._width)
-        , _height(other._height)
+        : m_pixels(new byte[other.m_width * other.m_height])
+        , m_width(other.m_width)
+        , m_height(other.m_height)
     {
-        memcpy(_pixels, other._pixels, _width * _height);
+        memcpy(m_pixels, other.m_pixels, m_width * m_height);
     }
 
     ~Bitmap()
     {
-        if (_pixels && _werePixelsCopied) // only delete if ctor alloc'd, duh
-            delete[] _pixels;
+        if (m_pixels && m_werePixelsCopied) // only delete if ctor alloc'd, duh
+            delete[] m_pixels;
     }
 
-    byte pixelAt(int x, int y) const { return _pixels[(y * _width) + x]; }
-    byte* pixelPtrAt(int x, int y) const { return &_pixels[(y * _width) + x]; }
+    byte pixelAt(int x, int y) const { return m_pixels[(y * m_width) + x]; }
+    byte* pixelPtrAt(int x, int y) const { return &m_pixels[(y * m_width) + x]; }
 
-    unsigned int width() const { return _width; }
-    unsigned int height() const { return _height; }
+    unsigned int width() const { return m_width; }
+    unsigned int height() const { return m_height; }
 
 private:
-    byte* const _pixels;
-    const int _width;
-    const int _height;
+    byte* const m_pixels;
+    const int m_width;
+    const int m_height;
 
-    bool _werePixelsCopied = false; /// did ctor alloc new memory, or is it using pre-existing chunk for pixel data?
-    bool _hasZeroPixel = false; /// for optimization; if false, blitter uses faster memcpy-based routine
+    bool m_werePixelsCopied = false; /// did ctor alloc new memory, or is it using pre-existing chunk for pixel data?
+    bool m_hasZeroPixel = false; /// for optimization; if false, blitter uses faster memcpy-based routine
 };

@@ -15,14 +15,14 @@ void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
     for (int y = 0; y < height(); y++) {
         for (int x = 0; x < width(); x++) {
             const unsigned int idx = (width() * y) + x;
-            const byte color8 = _pixels[idx];
-            const uint32_t truecolor = _palette.getColor(color8).as_uint32();
+            const byte color8 = m_pixels[idx];
+            const uint32_t truecolor = m_palette.getColor(color8).as_uint32();
 
-            _destPixels32[idx] = truecolor;
+            m_destPixels32[idx] = truecolor;
         }
     }
 
-    SDL_UpdateTexture(sdlTexture, NULL, _destPixels32, _width * 4); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
+    SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32, m_width * 4); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
 }
 
 void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
@@ -54,7 +54,7 @@ void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
                       sprite_src_x = x + axB,
                       sprite_src_y = y + ayB;
 
-            const byte canvasPixel = _pixels[(canvas_dest_y * width()) + canvas_dest_x],
+            const byte canvasPixel = m_pixels[(canvas_dest_y * width()) + canvas_dest_x],
                        spritePixel = bitmap.pixelAt(sprite_src_x, sprite_src_y),
                        mask = reduceToMask(spritePixel),
                        mixed = (spritePixel & mask) ^ (canvasPixel & ~mask);
@@ -95,7 +95,7 @@ void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty)
                   sprite_src_y = y + ayB,
                   sprite_src_x = axB;
 
-        byte* const canvasRowBegin = &_pixels[(canvas_dest_y * width()) + canvas_dest_x];
+        byte* const canvasRowBegin = &m_pixels[(canvas_dest_y * width()) + canvas_dest_x];
         const byte* const spriteRowBegin = bitmap.pixelPtrAt(sprite_src_x, sprite_src_y);
 
         memcpy(canvasRowBegin, spriteRowBegin, s_across_x);
@@ -135,7 +135,7 @@ void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
     for (int y = 0; y < s_across_y; y++) {
         const int canvas_dest_y = y + bdy,
                   canvas_dest_x = bdx;
-        byte* const canvasRowBegin = &_pixels[(canvas_dest_y * width()) + canvas_dest_x];
+        byte* const canvasRowBegin = &m_pixels[(canvas_dest_y * width()) + canvas_dest_x];
 
         memset(canvasRowBegin, color, s_across_x);
     }

@@ -1,35 +1,33 @@
 #include "Render.hpp"
 #include "Quat.hpp"
 
+Vec3 calculateTriNormal(const Vec3& v1, const Vec3& v2, const Vec3& v3)
+{
+    const Vec3 a = v2 - v1,
+               b = v3 - v1;
+    return Vec3::cross(a, b);
+}
+
 void drawFlat3DTriangle(Canvas& canvas,
     const Camera& camera,
     byte color,
-    const Vec3& v1, const Vec3& v2, const Vec3& v3,
-    const Mat& tmat)
+    const Vec3& v1, const Vec3& v2, const Vec3& v3, // world-space vertices
+    const Mat& tmat, // matrix to transform vertices from world->clipping
+    bool cullBackfaces = true)
 {
-    /*static float rot = 0.0f;
-    //rot += 0.000025f;
-    const Quat rotQuat = Quat::fromAxisRotation(Vec3(0.5, 0.0, 1.0), rot);
-    const Mat rotMat = rotQuat.toMatrix();*/
-    //const Mat scMat = Mat::scaleMatrix(0.2, 0.2, 0.2);
-
     // Perf TODO: probably better to do this in one clustered batch for all world geometry
     // to a buffer full of screen-space triangles, and then actually draw from that buffer
     const Vec3 tv1 = tmat * v1; // scMat * rotMat * v1;
-    const Vec3 tv2 = tmat * v2; // scMat* rotMat* v2;
+    const Vec3 tv2 = tmat * v2; // scMat * rotMat * v2;
     const Vec3 tv3 = tmat * v3; // scMat * rotMat * v3;
+    const Vec3 camv = camera.getTarget() - camera.getOrigin();
+
+    if (cullBackfaces && (Vec3::dot(camv, calculateTriNormal(tv1, tv2, tv3)) > 0))
+        return;
 
     const int w = canvas.width(),
               h = canvas.height();
     const int m = std::min(w, h);
-
-    // TODO: impl. backface culling later
-    /*const int sx1 = static_cast<int>((1.0f + tv1.x) * w * 0.5),
-              sy1 = static_cast<int>((1.0f - tv1.y) * h * 0.5),
-              sx2 = static_cast<int>((1.0f + tv2.x) * w * 0.5),
-              sy2 = static_cast<int>((1.0f - tv2.y) * h * 0.5),
-              sx3 = static_cast<int>((1.0f + tv3.x) * w * 0.5),
-              sy3 = static_cast<int>((1.0f - tv3.y) * h * 0.5);*/
     const float cnear = camera.getNear();
 
     const int sx1 = (w * 0.5f) + (tv1.x * w * 0.5f / std::max(tv1.z, cnear)),

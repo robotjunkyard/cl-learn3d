@@ -73,43 +73,43 @@ class Canvas;
 class Canvas {
 public:
     Canvas(Palette& palette, int width, int height)
-        : _width(width)
-        , _height(height)
-        , _palette(palette)
+        : m_width(width)
+        , m_height(height)
+        , m_palette(palette)
     {
         if (!((width > 0) && (height > 0)))
             throw std::bad_alloc(); // bad_array_new_length();
 
-        _pixels = new byte[width * height];
-        if (!_pixels)
+        m_pixels = new byte[width * height];
+        if (!m_pixels)
             throw std::bad_alloc();
-        _destPixels32 = new uint32_t[width * height];
-        if (!_destPixels32)
+        m_destPixels32 = new uint32_t[width * height];
+        if (!m_destPixels32)
             throw std::bad_alloc();
 
-        memset(_pixels, 0, width * height * sizeof(_pixels[0]));
-        memset(_destPixels32, 0, width * height * sizeof(_destPixels32[0]));
+        memset(m_pixels, 0, width * height * sizeof(m_pixels[0]));
+        memset(m_destPixels32, 0, width * height * sizeof(m_destPixels32[0]));
     }
 
     ~Canvas()
     {
-        delete[] _destPixels32;
-        delete[] _pixels;
+        delete[] m_destPixels32;
+        delete[] m_pixels;
     }
 
     void setPixel(int x, int y, byte color)
     {
-        _pixels[(y * width()) + x] = color;
+        m_pixels[(y * width()) + x] = color;
     }
 
     void clear(byte color = 1)
     {
-        memset(_pixels, color, width() * height() * sizeof(_pixels[0]));
+        memset(m_pixels, color, width() * height() * sizeof(m_pixels[0]));
     }
 
     byte getPixel(int x, int y) const
     {
-        return _pixels[(y * width()) + x];
+        return m_pixels[(y * width()) + x];
     }
 
     void updateSDLTexture(SDL_Texture* sdlTexture) const;
@@ -127,19 +127,19 @@ public:
 
     int width() const
     {
-        return _width;
+        return m_width;
     }
     int height() const
     {
-        return _height;
+        return m_height;
     }
 
 private:
     void blitBitmapMasked(const Bitmap& source, int destx, int desty);
     void blitBitmapNonmasked(const Bitmap& source, int destx, int desty);
 
-    byte* _pixels;
-    uint32_t* _destPixels32;
-    int _width, _height;
-    Palette _palette;
+    byte* m_pixels;
+    uint32_t* m_destPixels32;
+    int m_width, m_height;
+    Palette m_palette;
 };
