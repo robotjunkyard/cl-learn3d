@@ -143,9 +143,26 @@ struct Mat {
 
     Vec3 operator*(const Vec3& v) const
     {
-        return Vec3(m11 * v.x + m21 * v.y + m31 * v.z,
-            m12 * v.x + m22 * v.y + m32 * v.z,
-            m13 * v.x + m23 * v.y + m33 * v.z);
+        float x = (v.x * m11) + (v.y * m21) + (v.z * m31) + m41;
+        float y = (v.x * m12) + (v.y * m22) + (v.z * m32) + m42;
+        float z = (v.x * m13) + (v.y * m23) + (v.z * m33) + m43;
+        float w = (v.x * m14) + (v.y * m24) + (v.z * m34) + m44;
+
+        // Saw this fix in other texts that I didn't notice before.
+        // Needed because multiplying M4*V3 can sometimes mess up the
+        // coordinate-space of a vector, and this nudges it back into
+        // whatever space it is supposed to be in.  Something about
+        // homogenous vs. Cartesian something-something-or-rather.
+        if (w == 0.0)
+            return Vec3(0.0, 0.0, 0.0);
+
+        if (w != 1.0) {
+            x /= w;
+            y /= w;
+            z /= w;
+        }
+
+        return Vec3(x, y, z);
     }
 
     static Mat identity()

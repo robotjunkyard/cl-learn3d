@@ -36,20 +36,34 @@ public:
     {
         const float aspectratio = (float)_xres / (float)_yres;
         const float s = tan((fov / 2.0f) * (pi / 180.0f)); // remember pi * 180 converts (fov/2)° to radians
-        const float j = (-near - far) / (far - near);
-        const float jj = 2.0f * far * near / (far - near);
+
+        /*const float j = (-near - far) / (far - near);
+			   const float jj = 2.0f * far * near / (far - near);*/
+        const float j = -far / (far - near);
+        const float jj = -(far * near) / (far - near);
 
         _projMatrix
             = Mat(1.0f / (s * aspectratio), 0.0f, 0.0f, 0.0f,
                 0.0f, 1.0f / s, 0.0f, 0.0f,
-                0.0f, 0.0f, j, jj,
-                0.0f, 0.0f, 1.0f, 0.0f);
+                0.0f, 0.0f, j, 1.0,
+                0.0f, 0.0f, jj, 0.0f);
 
         /*_projMatrix
-            = Mat(1.0f, 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f, 0.0f, 0.0f,
-                0.0f, 0.0f, j, jj,
-                0.0f, 0.0f, 1.0f, 0.0f);*/
+				= Mat(1.0f, 0.0f, 0.0f, 0.0f,
+				0.0f, 1.0f, 0.0f, 0.0f,
+				0.0f, 0.0f, j, jj,
+				0.0f, 0.0f, 1.0f, 0.0f);*/
+
+        // interesting, this seems to work too.  I think I used this before in CL-LEARN3D and then
+        // assumed I did something wrong when later seeing that EVERY OTHER MATH TEXT AND TUTORIAL
+        // IN THE UNIVERSE used the other construct of this same matrix
+        //
+        // adapted from https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix
+        /* _projMatrix
+            = Mat(s, 0.0f, 0.0f, 0.0f,
+                0.0f, s * aspectratio, 0.0f, 0.0f,
+                0.0f, 0.0f, j, 1.0,
+                0.0f, 0.0f, jj, 0.0f);*/
         _fov = fov;
         _near = near;
         _far = far;

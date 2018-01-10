@@ -114,14 +114,14 @@ int main()
             eyedelta += 0.01f;
 
             //float eyedist = 32 + 128.0 * sin(eyedelta);
-            float eyex = 32 * sin(eyedelta),
-                  eyey = 32 * cos(eyedelta),
-                  eyez = 16 * sin(eyedelta);
+            float eyex = 1 * sin(eyedelta),
+                  eyey = 1 * cos(eyedelta),
+                  eyez = 0.0; // 7 * sin(eyedelta);
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0, 0.0, 0.0),
-                Vec3(0.0, 0.0, -1.0)); // INVESTIGATE: exported model as Z-Up, but need -1 Z here for it to show proper orientation
-            camera.setPerspectiveProjection(90.0, 0.1, 100.0);
+                Vec3(0.0, 0.0, 1.0));
+            camera.setPerspectiveProjection(90.0, 0.1, 10.0);
         }
 
         drawMesh(canvas, camera, mesh);
