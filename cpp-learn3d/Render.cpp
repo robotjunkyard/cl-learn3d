@@ -43,7 +43,8 @@ void drawFlat3DTriangle(Canvas& canvas,
 
 void drawMesh(Canvas& canvas, const Camera& camera, const Mesh& mesh)
 {
-    const Mat worldMatrix = Mat::scaleMatrix(0.02) * camera.getViewMatrix() * camera.getProjMatrix();
+    // const Mat worldMatrix = Mat::scaleMatrix(0.02) * camera.getViewMatrix() * camera.getProjMatrix();
+    const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix() * Mat::scaleMatrix(0.02);
 
     // **HUGE** TODO: re-impl. SORT-MESH-FACE-DRAW-ORDER, which in CL-LEARN3D
     // done w/ a customized version of quicksort that took a predicate

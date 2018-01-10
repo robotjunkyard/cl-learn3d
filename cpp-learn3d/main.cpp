@@ -116,12 +116,12 @@ int main()
             //float eyedist = 32 + 128.0 * sin(eyedelta);
             float eyex = 1 * sin(eyedelta),
                   eyey = 1 * cos(eyedelta),
-                  eyez = 0.0; // 7 * sin(eyedelta);
+                  eyez = 0.8; // 7 * sin(eyedelta);
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0, 0.0, 0.0),
                 Vec3(0.0, 0.0, 1.0));
-            camera.setPerspectiveProjection(90.0, 0.1, 10.0);
+            camera.setPerspectiveProjection(60.0, 0.1, 10.0);
         }
 
         drawMesh(canvas, camera, mesh);
