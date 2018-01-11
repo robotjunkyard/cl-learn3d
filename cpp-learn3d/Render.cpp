@@ -42,25 +42,6 @@ void drawFlat3DTriangle(Canvas& canvas,
         canvas.drawTriangle(sx1, sy1, sx2, sy2, sx3, sy3, color);
 }
 
-/*void drawMeshOld(Canvas& canvas, const Camera& camera, const Mesh& mesh)
-{
-    // const Mat worldMatrix = Mat::scaleMatrix(0.02) * camera.getViewMatrix() * camera.getProjMatrix();
-    const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix() * Mat::scaleMatrix(0.02);
-
-    // **HUGE** TODO: re-impl. SORT-MESH-FACE-DRAW-ORDER, which in CL-LEARN3D
-    // done w/ a customized version of quicksort that took a predicate
-    // function.  Wonder if that can be just as elegantly done in C++14's
-    // lambda function facilities, which I haven't yet messed w/ very much...
-    for (int faceNum = 0; faceNum < mesh.getFaces().size(); faceNum++) {
-        // another less important but still necessary TODO: materials!
-        byte color = 2 + (faceNum % 30);
-        Vec3 v0, v1, v2;
-        mesh.getMeshFaceVertices(faceNum, v0, v1, v2);
-
-        drawFlat3DTriangle(canvas, camera, color, v0, v1, v2, worldMatrix);
-    }
-}*/
-
 // comparative vertex distance means it is not the LITERAL distance between
 // two vertices, but a value that's good enough for comparing two distances.
 // Basically, this omits slower sqrt calculations which are unnecessary
@@ -82,10 +63,14 @@ void sortMeshTriangles(Mesh& mesh, const Mat& tmat, const Camera& camera)
         const Vec3& eye = camera.getOrigin();
         Vec3 v1, v2, v3;
         mesh.getMeshFaceVertices(facenum, v1, v2, v3);
-        const Vec3 tv1 = tmat * v1,
-                   tv2 = tmat * v2,
-                   tv3 = tmat * v3,
-                   tcp = tmat * -eye;
+        /*const Vec3 tv1 = tmat * v1,
+			tv2 = tmat * v2,
+			tv3 = tmat * v3,
+			tcp = tmat * eye;*/
+        const Vec3 tv1 = v1,
+                   tv2 = v2,
+                   tv3 = v3,
+                   tcp = tmat * eye;
         // point whose X,Y,Z values are the MINIMUM values among each of the
         // X,Y,Z values of the three transformed points of the triangle.
         // TODO: not sure if this is always the ideal approach.  Models with
@@ -103,7 +88,7 @@ void sortMeshTriangles(Mesh& mesh, const Mat& tmat, const Camera& camera)
             = Vec3((tv1.x + tv2.x + tv3.x) / 3.0,
                 (tv1.y + tv2.y + tv3.y) / 3.0,
                 (tv1.z + tv2.z + tv3.z) / 3.0);
-        return comparativeVertexDistance(tcp, maxtv);
+        return comparativeVertexDistance(-eye, maxtv);
     };
 
     pQuicksort<unsigned int, float>(mesh.getFaceSortBuffer(), 0, mesh.getFaceSortBuffer().size() - 1, triSortValuator);

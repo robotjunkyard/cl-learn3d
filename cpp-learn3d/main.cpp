@@ -46,7 +46,8 @@ int main()
         1.0f, // near
         80.0f); // far
 
-    Mesh mesh = Mesh::loadMesh("models/unitcubes.obj");
+    //Mesh mesh = Mesh::loadMesh("models/unitcubes.obj");
+    Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -120,16 +121,16 @@ int main()
             float fov = 90 + 80 * sin(fovdelta);
             printf("fov = %f\n", fov);*/
 
-            // trying to troubleshoot LookAt bullshit
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
+            float h = 1.0f;
             float eyex = 32 * sin(eyedelta),
                   eyey = 32 * cos(eyedelta),
-                  eyez = 3.5f; // 7 * sin(eyedelta);
+                  eyez = 10.25f + h;
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
-                Vec3(0.0f, 0.0f, 0.0f),
+                Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 1.0f));
             camera.setPerspectiveProjection(90.0f, 0.1f, 10.0f);
         }

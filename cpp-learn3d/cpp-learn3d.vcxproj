@@ -153,7 +153,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mat.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="PredicateQuicksort.cpp" />
     <ClCompile Include="Quat.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="UI.cpp" />
