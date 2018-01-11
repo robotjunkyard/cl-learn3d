@@ -47,7 +47,8 @@ int main()
         80.0f); // far
 
     //Mesh mesh = Mesh::loadMesh("models/unitcubes.obj");
-    Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
+    //Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
+    Mesh mesh = Mesh::loadMesh("models/matorb.obj");
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -115,24 +116,18 @@ int main()
             cy = canvasMousePos.second;
 
         {
-            // tests FOV
-            /*static float fovdelta = 0.0f;
-            fovdelta += 0.01f;
-            float fov = 90 + 80 * sin(fovdelta);
-            printf("fov = %f\n", fov);*/
-
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
-            float h = 1.0f;
-            float eyex = 32 * sin(eyedelta),
-                  eyey = 32 * cos(eyedelta),
-                  eyez = 10.25f + h;
+            float h = 0.0f;
+            float eyex = 24 * sin(eyedelta),
+                  eyey = 24 * cos(eyedelta),
+                  eyez = 16.0f + h;
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 1.0f));
-            camera.setPerspectiveProjection(90.0f, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(50.0f, 0.1f, 10.0f);
         }
 
         drawMesh(canvas, camera, mesh);

@@ -21,9 +21,9 @@ void drawFlat3DTriangle(Canvas& canvas,
     const Vec3 tv1 = tmat * v1; // scMat * rotMat * v1;
     const Vec3 tv2 = tmat * v2; // scMat * rotMat * v2;
     const Vec3 tv3 = tmat * v3; // scMat * rotMat * v3;
-    const Vec3 camv = camera.getTarget() - camera.getOrigin();
+    const Vec3 camv = tmat * (camera.getTarget() - camera.getOrigin());
 
-    if (cullBackfaces && (Vec3::dot(camv, calculateTriNormal(tv1, tv2, tv3)) > 0))
+    if (cullBackfaces && (Vec3::dot(camv, calculateTriNormal(tv1, tv2, tv3)) >= 0.0f))
         return;
 
     const int w = canvas.width(),
@@ -63,31 +63,19 @@ void sortMeshTriangles(Mesh& mesh, const Mat& tmat, const Camera& camera)
         const Vec3& eye = camera.getOrigin();
         Vec3 v1, v2, v3;
         mesh.getMeshFaceVertices(facenum, v1, v2, v3);
-        /*const Vec3 tv1 = tmat * v1,
-			tv2 = tmat * v2,
-			tv3 = tmat * v3,
-			tcp = tmat * eye;*/
-        const Vec3 tv1 = v1,
-                   tv2 = v2,
-                   tv3 = v3,
-                   tcp = tmat * eye;
-        // point whose X,Y,Z values are the MINIMUM values among each of the
-        // X,Y,Z values of the three transformed points of the triangle.
-        // TODO: not sure if this is always the ideal approach.  Models with
-        // concavity tended to flicker in cl-learn3d.
-
-        const Vec3 mintv
-            = Vec3(std::min(tv1.x, std::min(tv2.x, tv3.x)),
-                std::min(tv1.y, std::min(tv2.y, tv3.y)),
-                std::min(tv1.z, std::min(tv2.z, tv3.z)));
+        const Vec3 tcp = tmat * eye;
+        //const Vec3 mintv
+        //    = Vec3(std::min(tv1.x, std::min(tv2.x, tv3.x)),
+        //        std::min(tv1.y, std::min(tv2.y, tv3.y)),
+        //        std::min(tv1.z, std::min(tv2.z, tv3.z)));
         const Vec3 maxtv
-            = Vec3(std::max(tv1.x, std::max(tv2.x, tv3.x)),
-                std::max(tv1.y, std::max(tv2.y, tv3.y)),
-                std::max(tv1.z, std::max(tv2.z, tv3.z)));
-        const Vec3 avgtv
-            = Vec3((tv1.x + tv2.x + tv3.x) / 3.0,
-                (tv1.y + tv2.y + tv3.y) / 3.0,
-                (tv1.z + tv2.z + tv3.z) / 3.0);
+            = Vec3(std::max(v1.x, std::max(v2.x, v3.x)),
+                std::max(v1.y, std::max(v2.y, v3.y)),
+                std::max(v1.z, std::max(v2.z, v3.z)));
+        //const Vec3 avgtv
+        //    = Vec3((tv1.x + tv2.x + tv3.x) / 3.0,
+        //        (tv1.y + tv2.y + tv3.y) / 3.0,
+        //        (tv1.z + tv2.z + tv3.z) / 3.0);
         return comparativeVertexDistance(-eye, maxtv);
     };
 
