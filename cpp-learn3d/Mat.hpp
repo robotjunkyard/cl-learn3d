@@ -224,7 +224,6 @@ struct Mat {
         m41, m42, m43, m44;
 };
 
-// TODO: THIS NEEDS TO BE TESTED
 inline Mat operator*(const Mat& b, const Mat& a)
 {
     const float m11 = (a.m11 * b.m11) + (a.m12 * b.m21) + (a.m13 * b.m31) + (a.m14 * b.m41);

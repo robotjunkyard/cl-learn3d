@@ -152,6 +152,11 @@ public:
         return Vec3(cx, cy, cz);
     }
 
+    static Vec3 zero()
+    {
+        return Vec3(0.0f, 0.0f, 0.0f);
+    }
+
     static float dot(const Vec3& a, const Vec3& b)
     {
         return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);

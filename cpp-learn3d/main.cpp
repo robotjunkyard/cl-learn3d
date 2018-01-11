@@ -11,11 +11,13 @@
 #include "CanvasDef.hpp"
 #include "Mat.hpp"
 #include "Mesh.hpp"
+#include "PredicateQuicksort.hpp"
 #include "Quat.hpp"
 #include "Render.hpp"
 #include "UI.hpp"
 #include "canvas8.hpp"
 #include <cstdio>
+#include <vector>
 
 bool paused = false;
 const int framerateLock = 60;
@@ -25,8 +27,17 @@ Palette make_db32_Palette();
 
 #undef main // fuck off, SDL
 
+int vtest(int i)
+{
+    return i;
+}
+
 int main()
 {
+    std::vector<int> nums = { 3, 6, 2, 5, 8, 10, 2, 6, 6, 20, 2, -5, -100 };
+    const std::function<int(int)> valuator = vtest;
+    pQuicksort<int, float>(nums, 0, nums.size() - 1, valuator);
+
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(3.0f, 3.0f, 0.0f),
         Vec3(0.0f, 0.0f, 0.0f),
@@ -113,15 +124,14 @@ int main()
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
-            //float eyedist = 32 + 128.0 * sin(eyedelta);
-            float eyex = 1 * sin(eyedelta),
-                  eyey = 1 * cos(eyedelta),
-                  eyez = 0.8; // 7 * sin(eyedelta);
+            float eyex = 32 * sin(eyedelta),
+                  eyey = 32 * cos(eyedelta),
+                  eyez = 3.5f; // 7 * sin(eyedelta);
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
-                Vec3(0.0, 0.0, 0.0),
-                Vec3(0.0, 0.0, 1.0));
-            camera.setPerspectiveProjection(60.0, 0.1, 10.0);
+                Vec3(0.0f, 0.0f, 0.0f),
+                Vec3(0.0f, 0.0f, 1.0f));
+            camera.setPerspectiveProjection(90.0f, 0.1f, 10.0f);
         }
 
         drawMesh(canvas, camera, mesh);

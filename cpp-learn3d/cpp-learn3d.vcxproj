@@ -23,7 +23,7 @@
     <ProjectGuid>{E619CCB7-1643-40EF-999B-2EE402D933A8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>cpplearn3d</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -90,6 +90,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>c:\src\boost_1_66_0\;$(SolutionDir)dep\SDL2-2.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -119,6 +120,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>c:\src\boost_1_66_0\;$(SolutionDir)dep\SDL2-2.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CppLanguageStandard>c++1y</CppLanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +153,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mat.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="PredicateQuicksort.cpp" />
     <ClCompile Include="Quat.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="UI.cpp" />
@@ -163,6 +166,7 @@
     <ClInclude Include="CanvasDef.hpp" />
     <ClInclude Include="Mat.hpp" />
     <ClInclude Include="Mesh.hpp" />
+    <ClInclude Include="PredicateQuicksort.hpp" />
     <ClInclude Include="Quat.hpp" />
     <ClInclude Include="Render.hpp" />
     <ClInclude Include="UI.hpp" />

@@ -39,7 +39,7 @@ public:
         return m_faces;
     }
 
-    std::vector<mesh_face_t>& getFaceSortBuffer()
+    std::vector<unsigned int>& getFaceSortBuffer()
     {
         return m_facesortbuffer;
     }
@@ -67,11 +67,12 @@ private:
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo)
         : m_vertices(vertexdata)
         , m_faces(faceinfo)
-        , m_facesortbuffer(faceinfo)
     {
+        for (unsigned int i = 0; i < m_faces.size(); i++)
+            m_facesortbuffer.push_back(i);
     }
 
     const std::vector<Vec3> m_vertices;
     const std::vector<mesh_face_t> m_faces;
-    std::vector<mesh_face_t> m_facesortbuffer;
+    mutable std::vector<unsigned int> m_facesortbuffer; // indices of faces, frequently re-sorted per frame
 };
