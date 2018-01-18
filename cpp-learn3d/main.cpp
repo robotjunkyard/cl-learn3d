@@ -1,7 +1,7 @@
 #ifdef _MSC_VER
 #pragma warning(push, 0)
 #endif
-#include <SDL2\SDL.h>
+#include <SDL2/SDL.h>
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif

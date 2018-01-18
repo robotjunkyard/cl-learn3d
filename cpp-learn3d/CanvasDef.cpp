@@ -198,14 +198,17 @@ void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte c
         goto draw_lower;
     }
 
-    const float dupper = static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top);
-    TRIDBGMSG("UPPER:  dupper = %f\n", dupper);
-    // draw upper sub-triangle
-    for (int yi = topy; yi < std::min(midy, height()); yi++) {
+    {
+      const float dupper = static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top);
+      TRIDBGMSG("UPPER:  dupper = %f\n", dupper);
+      // draw upper sub-triangle
+      for (int yi = topy; yi < std::min(midy, height()); yi++) {
         drawHorizLine(static_cast<int>(sx0), yi, static_cast<int>(sx1), color);
         sx0 += dupper;
         sx1 += dlong;
+      }
     }
+
 
     // draw lower sub-triangle
 draw_lower:

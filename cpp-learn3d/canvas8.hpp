@@ -23,14 +23,14 @@ inline byte reduceToInverseMask(byte val)
 
 inline void swap1pair(int& a, int& b)
 {
-    register int tmp = a;
+    const int tmp = a;
     a = b;
     b = tmp;
 }
 
 inline void swap2pair(int& a1, int& b1, int& a2, int& b2)
 {
-    register int tmp = a1;
+    int tmp = a1;
     a1 = b1;
     b1 = tmp;
     tmp = a2;
