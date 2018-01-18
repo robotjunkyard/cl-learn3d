@@ -32,12 +32,8 @@ int vtest(int i)
     return i;
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    std::vector<int> nums = { 3, 6, 2, 5, 8, 10, 2, 6, 6, 20, 2, -5, -100 };
-    const std::function<int(int)> valuator = vtest;
-    pQuicksort<int, float>(nums, 0, nums.size() - 1, valuator);
-
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(3.0f, 3.0f, 0.0f),
         Vec3(0.0f, 0.0f, 0.0f),
@@ -46,9 +42,14 @@ int main()
         1.0f, // near
         80.0f); // far
 
-    //Mesh mesh = Mesh::loadMesh("models/unitcubes.obj");
-    //Mesh mesh = Mesh::loadMesh("models/spaceship.obj");
-    Mesh mesh = Mesh::loadMesh("models/matorb.obj");
+    std::string meshname = "";
+    if (argc == 2)
+      meshname = argv[1];
+    if (meshname == "")
+      meshname = "matorb";
+
+    std::string fullpath = std::string("models/") + meshname + ".obj";
+    Mesh mesh = Mesh::loadMesh(fullpath);
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
