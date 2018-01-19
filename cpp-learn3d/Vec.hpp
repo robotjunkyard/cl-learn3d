@@ -233,6 +233,112 @@ public:
     float x, y, z;
 };
 
+class Vec2 {
+public:
+    Vec2()
+        : x(1.0f)
+        , y(0.0f)
+    {
+    }
+
+    ~Vec2() = default;
+
+    Vec2(float x, float y)
+        : x(x)
+        , y(y)
+    {
+    }
+
+    Vec2(const Vec3& other)
+        : x(other.x)
+        , y(other.y)
+    {
+    }
+
+    static Vec2 zero()
+    {
+        return Vec2(0.0f, 0.0f);
+    }
+
+    static float dot(const Vec2& a, const Vec2& b)
+    {
+        return (a.x * b.x) + (a.y * b.y);
+    }
+
+    Vec2& operator=(const Vec2& other)
+    {
+        x = other.x;
+        y = other.y;
+        return *this;
+    }
+
+    float& operator[](int idx)
+    {
+        return ((float*)(&x))[idx];
+    }
+
+    const float& operator[](int idx) const
+    {
+        return ((float*)(&x))[idx];
+    }
+
+    Vec2& operator+=(const Vec2& other)
+    {
+        x += other.x;
+        y += other.y;
+        return *this;
+    }
+
+    Vec2& operator-=(const Vec2& other)
+    {
+        x -= other.x;
+        y -= other.y;
+        return *this;
+    }
+
+    Vec2 operator-() const
+    {
+        return Vec2(-x, -y);
+    }
+
+    Vec2& operator*=(const float c)
+    {
+        x *= c;
+        y *= c;
+        return *this;
+    }
+
+    bool operator==(const Vec2& other) const
+    {
+        return feq(x, other.x) && feq(y, other.y);
+    }
+
+    float mag() const
+    {
+        return sqrt((x * x) + (y * y));
+    }
+
+    Vec2& normalize()
+    {
+        const float m = mag();
+        if (m != 0.0f) { // TODO: use epsilon-compare
+            x /= m;
+            y /= m;
+        }
+        return *this;
+    }
+
+    union {
+        float x;
+        float u;
+    };
+
+    union {
+        float y;
+        float v;
+    };
+};
+
 inline Vec4 operator+(const Vec4& a, const Vec4& b)
 {
     return Vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
@@ -251,4 +357,14 @@ inline Vec3 operator+(const Vec3& a, const Vec3& b)
 inline Vec3 operator-(const Vec3& a, const Vec3& b)
 {
     return Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
+}
+
+inline Vec2 operator+(const Vec2& a, const Vec2& b)
+{
+    return Vec2(a.x + b.x, a.y + b.y);
+}
+
+inline Vec2 operator-(const Vec2& a, const Vec2& b)
+{
+    return Vec2(a.x - b.x, a.y - b.y);
 }

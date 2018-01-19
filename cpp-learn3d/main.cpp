@@ -32,7 +32,7 @@ int vtest(int i)
     return i;
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(3.0f, 3.0f, 0.0f),
@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
 
     std::string meshname = "";
     if (argc == 2)
-      meshname = argv[1];
+        meshname = argv[1];
     if (meshname == "")
-      meshname = "matorb";
+        meshname = "obelisk"; //"matorb";
 
     std::string fullpath = std::string("models/") + meshname + ".obj";
     Mesh mesh = Mesh::loadMesh(fullpath);

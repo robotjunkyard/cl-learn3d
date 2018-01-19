@@ -5,11 +5,9 @@
 #include <cstring>
 #include <string>
 
-// #define _CRT_SECURE_NO_WARNINGS 1
-
 class Bitmap {
 public:
-    Bitmap(int width, int height, const char* const filename)
+    Bitmap(int width, int height, const std::string& filename, const std::string& directory = "gfx")
         : m_pixels(new byte[width * height])
         , m_width(width)
         , m_height(height)
@@ -17,26 +15,34 @@ public:
         if (nullptr == m_pixels)
             throw "Failed to allocate pixels.";
 
-        if (filename) {
-            std::string fn = "gfx/" + std::string(filename);
-            FILE* fp = fopen(fn.c_str(), "r");
-            if (fp) {
-                fread(m_pixels, 1, width * height, fp);
-                fclose(fp);
+        std::string fn = directory + "/" + filename;
+        FILE* fp = fopen(fn.c_str(), "r");
+        if (fp) {
+            fread(m_pixels, 1, width * height, fp);
+            fclose(fp);
 
-                for (int i = 0; i < width * height; i++)
-                    if (0 == m_pixels[i]) {
-                        m_hasZeroPixel = true;
-                        break;
-                    }
-            } else {
-                printf("File not found.\n");
-                throw "File not found.";
-            }
+            for (int i = 0; i < width * height; i++)
+                if (0 == m_pixels[i]) {
+                    m_hasZeroPixel = true;
+                    break;
+                }
         } else {
-            memset(m_pixels, 0x00, width * height);
-            m_hasZeroPixel = true;
+            printf("File not found.\n");
+            memset(m_pixels, 0, width * height);
+            throw "File not found.";
         }
+    }
+
+    Bitmap(int width, int height)
+        : m_pixels(new byte[width * height])
+        , m_width(width)
+        , m_height(height)
+    {
+        if (nullptr == m_pixels)
+            throw "Failed to allocate pixels.";
+
+        memset(m_pixels, 0, width * height);
+        m_hasZeroPixel = true;
     }
 
     Bitmap(int width, int height, byte* const memloc, bool copyPixels = false)
