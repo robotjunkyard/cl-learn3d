@@ -124,6 +124,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,10 +157,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mat.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Quat.cpp" />
     <ClCompile Include="Render.cpp" />
     <ClCompile Include="UI.cpp" />
-    <ClCompile Include="Vec.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitmap.hpp" />

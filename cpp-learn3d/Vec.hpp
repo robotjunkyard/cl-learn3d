@@ -368,3 +368,17 @@ inline Vec2 operator-(const Vec2& a, const Vec2& b)
 {
     return Vec2(a.x - b.x, a.y - b.y);
 }
+
+// ====================================================================================
+// comparative vertex distance means it is not the LITERAL distance between
+// two vertices, but a value that's good enough for comparing two distances.
+// Basically, this omits slower sqrt calculations which are unnecessary
+// if you don't care about the ACTUAL distances--ONLY care about comparing them
+inline float comparativeVertexDistance(const Vec3& a, const Vec3& b)
+{
+    const float axbx = a.x - b.x,
+                ayby = a.y - b.y,
+                azbz = a.z - b.z,
+                result = (axbx * axbx) + (ayby * ayby) + (azbz * azbz);
+    return abs(result);
+}

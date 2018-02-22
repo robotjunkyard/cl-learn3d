@@ -13,12 +13,13 @@ int pqsPartition(std::vector<AET>& array,
 {
     int i = p - 1,
         j = r + 1;
-    VRT x = valuator(array[p]);
+    const VRT x = valuator(array[p]);
 
     while (true) {
         do {
             j--;
         } while (valuator(array[j]) > x);
+
         do {
             i++;
         } while (valuator(array[i]) < x);
@@ -38,7 +39,7 @@ std::vector<AET>& pQuicksort(std::vector<AET>& array,
     const std::function<VRT(AET)>& valuator)
 {
     if (lo < hi) {
-        int p = pqsPartition<AET, VRT>(array, lo, hi, valuator);
+        const int p = pqsPartition<AET, VRT>(array, lo, hi, valuator);
         pQuicksort<AET, VRT>(array, lo, p, valuator);
         pQuicksort<AET, VRT>(array, p + 1, hi, valuator);
     }

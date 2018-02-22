@@ -1,7 +1,11 @@
 #pragma once
+#include "PredicateQuicksort.hpp"
 #include "Vec.hpp"
 #include <memory>
 #include <vector>
+
+class Camera;
+struct Mat;
 
 class mesh_face_t {
 public:
@@ -79,17 +83,20 @@ public:
 
     void getMeshFaceVertices(const int faceIndex, Vec3& ov0, Vec3& ov1, Vec3& ov2) const
     {
-        const auto face = m_faces[faceIndex];
-        const int vidx0 = face.getV0(),
-                  vidx1 = face.getV1(),
-                  vidx2 = face.getV2();
-        const Vec3 &v0 = m_vertices[vidx0],
-                   &v1 = m_vertices[vidx1],
-                   &v2 = m_vertices[vidx2];
-        ov0 = v0;
-        ov1 = v1;
-        ov2 = v2;
+        const auto& face = m_faces[faceIndex];
+        ov0 = m_vertices[face.getV0()];
+        ov1 = m_vertices[face.getV1()];
+        ov2 = m_vertices[face.getV2()];
     }
+
+    // Sorts a mesh's draw-order buffer according to transformation matrix and camera orientation
+    // This is const because it is not something that alters first-class data, only the draw order
+    // which is considered highly mutable second-class data that is not specific to the information
+    // about the model's actual geometry itself.
+    //
+    // This all said, there's probably a better way to go about this than having the draw-order-buffer
+    // be a part of Mesh itself.  But that sort of re-org work comes much, much later...
+    void sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& camera) const;
 
 private:
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo)
@@ -117,5 +124,7 @@ private:
     const std::vector<Vec2> m_uvs; // optional
     const std::vector<mesh_face_t> m_faces;
     const std::vector<mesh_face_uv_t> m_faces_uv; // optional
-    std::vector<unsigned int> m_facesortbuffer; // indices of faces, frequently re-sorted per frame
+
+    // rendering-related data
+    mutable std::vector<unsigned int> m_facesortbuffer; // indices of faces, frequently re-sorted per frame
 };

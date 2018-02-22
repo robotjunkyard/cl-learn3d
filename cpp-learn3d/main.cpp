@@ -48,8 +48,8 @@ int main(int argc, char* argv[])
     if (meshname == "")
         meshname = "obelisk"; //"matorb";
 
-    std::string fullpath = std::string("models/") + meshname + ".obj";
-    Mesh mesh = Mesh::loadMesh(fullpath);
+    const std::string fullpath = std::string("models/") + meshname + ".obj";
+    const Mesh mesh = Mesh::loadMesh(fullpath);
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
     unsigned int frame = 0;
 
     while (running) {
-        unsigned int ticksBeforeRender = SDL_GetTicks();
+        const unsigned int ticksBeforeRender = SDL_GetTicks();
 
         int mouse_x, mouse_y;
         SDL_GetMouseState(&mouse_x, &mouse_y);
@@ -107,23 +107,23 @@ int main(int argc, char* argv[])
 
         // DO ALL THE DRAWING TO CANVAS HERE
         canvas.clear();
-        Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
+
+        const Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
             windowWidth,
             windowHeight,
             CANVAS_WIDTH,
             CANVAS_HEIGHT);
-
-        int cx = canvasMousePos.first,
-            cy = canvasMousePos.second;
+        const int cx = canvasMousePos.first,
+                  cy = canvasMousePos.second;
 
         {
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
-            float h = 0.0f;
-            float eyex = 24 * sin(eyedelta),
-                  eyey = 24 * cos(eyedelta),
-                  eyez = 16.0f + h;
+            constexpr float h = 0.0f;
+            const float eyex = 24 * sin(eyedelta),
+                        eyey = 24 * cos(eyedelta),
+                        eyez = 16.0f + h;
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
@@ -131,14 +131,14 @@ int main(int argc, char* argv[])
             camera.setPerspectiveProjection(50.0f, 0.1f, 10.0f);
         }
 
-        drawMesh(canvas, camera, mesh);
+        Render::drawMesh(canvas, camera, mesh);
 
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
         SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
 
-        unsigned int ticksAfterRender = SDL_GetTicks();
-        unsigned int tickDiff = ticksAfterRender - ticksBeforeRender;
+        const unsigned int ticksAfterRender = SDL_GetTicks();
+        const unsigned int tickDiff = ticksAfterRender - ticksBeforeRender;
 
         if (tickDiff < screenTicksPerFrame) {
             SDL_Delay(screenTicksPerFrame - tickDiff);

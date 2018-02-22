@@ -5,6 +5,11 @@
 #include <cstring>
 #include <string>
 
+/// A BitMap is an 8-bit indexed color image.
+///
+/// TODO: Whip up an ad-hoc file format later, one that has width and height in its header,
+/// and write a little exporter for it for GIMP, so that the need to manually specify width
+/// and height in the Bitmap constructor (eww) can be eliminated.
 class Bitmap {
 public:
     Bitmap(int width, int height, const std::string& filename, const std::string& directory = "gfx")
@@ -15,7 +20,7 @@ public:
         if (nullptr == m_pixels)
             throw "Failed to allocate pixels.";
 
-        std::string fn = directory + "/" + filename;
+        const std::string fn = directory + "/" + filename;
         FILE* fp = fopen(fn.c_str(), "r");
         if (fp) {
             fread(m_pixels, 1, width * height, fp);

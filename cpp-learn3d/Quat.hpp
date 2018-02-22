@@ -37,14 +37,14 @@ public:
     {
         const float sum = w + x + y + z;
         const float div = sqrt((w * w) + (x * x) + (y * y) + (z * z));
-        w = w / div;
-        x = x / div;
-        y = y / div;
-        z = z / div;
+        w /= div;
+        x /= div;
+        y /= div;
+        z /= div;
         return *this;
     }
 
-    ~Quat();
+    ~Quat() {}
 
     static Quat fromAxisRotation(const Vec3& axis, float angle)
     {

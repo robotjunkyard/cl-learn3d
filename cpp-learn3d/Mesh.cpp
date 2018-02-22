@@ -1,4 +1,7 @@
 #include "Mesh.hpp"
+#include "Camera.hpp"
+#include "Mat.hpp"
+#include "PredicateQuicksort.hpp"
 #include "boost/tokenizer.hpp"
 #include <fstream>
 #include <sstream>
@@ -20,8 +23,8 @@ Mesh Mesh::loadMesh(std::string filename)
         std::vector<std::string> tokens;
 
         typedef boost::tokenizer<boost::char_separator<char>> tokenizer;
-        boost::char_separator<char> sep(" ");
-        tokenizer tok(line, sep);
+        const boost::char_separator<char> sep(" ");
+        const tokenizer tok(line, sep);
 
         for (auto beg = tok.begin(); beg != tok.end(); ++beg) {
             tokens.push_back(*beg);
@@ -56,7 +59,7 @@ Mesh Mesh::loadMesh(std::string filename)
             for (const auto& fparam : fparams) {
                 typedef boost::tokenizer<boost::char_separator<char>> f_tokenizer;
                 const boost::char_separator<char> f_sep("/");
-                f_tokenizer f_tok(fparam, f_sep);
+                const f_tokenizer f_tok(fparam, f_sep);
                 std::vector<std::string> fptokens;
                 for (auto beg = f_tok.begin(); beg != f_tok.end(); ++beg) {
                     printf("pushing %s\n", (*beg).c_str());
@@ -69,7 +72,7 @@ Mesh Mesh::loadMesh(std::string filename)
                 switch (fptokens.size()) {
                 case 1:
                     break; // OK
-                case 3: // we don't care
+                case 3:
                     f_has_uvs = true;
                     fuv[i] = std::stoi(fptokens[1].c_str()) - 1;
                     break;
@@ -81,9 +84,9 @@ Mesh Mesh::loadMesh(std::string filename)
             }
 
             printf("Face %d: %d, %d, %d\n", facen, fv[0], fv[1], fv[2]);
-            facedata.push_back(mesh_face_t(fv[0], fv[1], fv[2]));
+            facedata.push_back(mesh_face_t{ fv[0], fv[1], fv[2] });
             if (f_has_uvs)
-                faceuvdata.push_back(mesh_face_uv_t(fuv[0], fuv[1], fuv[2]));
+                faceuvdata.push_back(mesh_face_uv_t{ fuv[0], fuv[1], fuv[2] });
             facen++;
         } else {
             printf("Unknown/Unsupported directive '%s'\n", directive.c_str());
@@ -91,4 +94,22 @@ Mesh Mesh::loadMesh(std::string filename)
     }
 
     return Mesh(vertexdata, facedata, uvdata, faceuvdata);
+}
+
+void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& camera) const
+{
+    // triangle sort valuator lambda
+    auto triSortValuator = [&](int facenum) -> float {
+        const Vec3& eye = camera.getOrigin();
+        Vec3 v1, v2, v3;
+        getMeshFaceVertices(facenum, v1, v2, v3);
+        const Vec3 tcp = tmat * eye;
+        const Vec3 maxtv
+            = Vec3(std::max(v1.x, std::max(v2.x, v3.x)),
+                std::max(v1.y, std::max(v2.y, v3.y)),
+                std::max(v1.z, std::max(v2.z, v3.z)));
+        return comparativeVertexDistance(-eye, maxtv);
+    };
+
+    pQuicksort<unsigned int, float>(m_facesortbuffer, 0, m_facesortbuffer.size() - 1, triSortValuator);
 }
