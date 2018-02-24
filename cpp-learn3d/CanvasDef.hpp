@@ -34,10 +34,9 @@ struct color_t {
 class Palette {
 public:
     Palette(const std::array<color_t, 256>& colors)
-        : _colors(colors)
-        , _initColors(colors)
+        : _initColors(withRedBlueSwapped(colors))
+        , _colors(withRedBlueSwapped(colors))
     {
-        swapRedBlue();
     }
 
     ~Palette()
@@ -64,8 +63,17 @@ public:
     }
 
 private:
-    void swapRedBlue(); // necessary because of SDL
-    std::array<color_t, 256> _colors, _initColors;
+    std::array<color_t, 256> withRedBlueSwapped(const std::array<color_t, 256>& other)
+    {
+        std::array<color_t, 256> newcolors = other;
+        for (auto& color : newcolors)
+            std::swap(color.r, color.b);
+
+        return newcolors;
+    }
+
+    const std::array<color_t, 256> _initColors;
+    std::array<color_t, 256> _colors;
 };
 
 class Canvas;

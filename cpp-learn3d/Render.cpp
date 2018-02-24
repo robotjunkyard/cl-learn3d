@@ -30,7 +30,7 @@ void Render::drawFlat3DTriangle(Canvas& canvas,
               h = canvas.height();
     const float cnear = camera.getNear();
 
-    const std::function<float(float)> rfunc = &ceilf;
+    const std::function<float(float)> rfunc = ceilf;
     const int sx1 = static_cast<int>(rfunc((w * 0.5f) + (tv1.x * w * 0.5f / std::max(tv1.z, cnear)))),
               sy1 = static_cast<int>(rfunc((h * 0.5f) + (tv1.y * h * 0.5f / std::max(tv1.z, cnear)))),
               sx2 = static_cast<int>(rfunc((w * 0.5f) + (tv2.x * w * 0.5f / std::max(tv2.z, cnear)))),

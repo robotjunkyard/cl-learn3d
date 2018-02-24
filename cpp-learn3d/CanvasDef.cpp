@@ -22,7 +22,7 @@ void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
         }
     }
 
-    SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32.data(), m_width * 4); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
+    SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32.data(), m_width * sizeof(m_destPixels32[0])); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
 }
 
 #if BITMAP_HPP_INCLUDED
@@ -152,8 +152,8 @@ void Canvas::drawHorizLine(int x1, int y, int x2, byte color)
         return;
     }
 
-    int lx = std::min(x1, x2),
-        ux = std::max(x1, x2);
+    const int lx = std::min(x1, x2),
+              ux = std::max(x1, x2);
 
     if ((ux < 0) || (lx >= width())) {
         TRIDBGMSG("FAIL\n");
@@ -230,10 +230,10 @@ draw_lower:
     TRIDBGMSG("Tri OK\n");
 }
 
-void Palette::swapRedBlue()
+/*void Palette::swapRedBlue()
 {
     for (auto& color : _colors)
         std::swap(color.r, color.b);
     for (auto& color : _initColors)
         std::swap(color.r, color.b);
-}
+}*/

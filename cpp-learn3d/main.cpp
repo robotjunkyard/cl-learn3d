@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     if (argc == 2)
         meshname = argv[1];
     if (meshname == "")
-        meshname = "obelisk"; //"matorb";
+        meshname = "spaceship"; //"matorb";
 
     const std::string fullpath = std::string("models/") + meshname + ".obj";
     const Mesh mesh = Mesh::loadMesh(fullpath);
@@ -127,8 +127,8 @@ int main(int argc, char* argv[])
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
-                Vec3(0.0f, 0.0f, 1.0f));
-            camera.setPerspectiveProjection(50.0f, 0.1f, 10.0f);
+                Vec3(0.0f, 0.0f, 2.0f));
+            camera.setPerspectiveProjection(90.0f, 0.1f, 10.0f);
         }
 
         Render::drawMesh(canvas, camera, mesh);

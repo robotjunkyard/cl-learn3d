@@ -32,6 +32,7 @@
 		<Compiler>
 			<Add option="-Weffc++" />
 			<Add option="-std=c++11" />
+			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-m64" />
 			<Add option="`sdl2-config --cflags`" />

@@ -16,6 +16,9 @@ Mesh Mesh::loadMesh(std::string filename)
     std::vector<Vec2> normaldata;
 
     std::ifstream infile(filename);
+    if (!infile)
+        throw std::runtime_error("file not found: " + filename);
+
     std::string line;
     int vertn = 0, facen = 0, uvn = 0;
 
@@ -48,8 +51,8 @@ Mesh Mesh::loadMesh(std::string filename)
             std::string fparams[3] = { tokens[1], tokens[2], tokens[3] };
 
             bool f_has_uvs = false; // seems inelegant but whatever
-            int fv[3];
-            int fuv[3];
+            std::array<int,3> fv, fuv;
+
             // Two possible formats for 'f' directive may be seen:
             //   f vertIDX_1 vertIDX_2 vertIDX_3
             //   f vertIDX_1/uvIDX_1/normalIDX_1 vertIDX_2/uvIDX_2/normalIDX_2 vertIDX_3/uvIDX_3/normalIDX_3
@@ -77,7 +80,7 @@ Mesh Mesh::loadMesh(std::string filename)
                     fuv[i] = std::stoi(fptokens[1].c_str()) - 1;
                     break;
                 default:
-                    throw "malformatted .obj";
+                    throw std::runtime_error("malformatted .obj");
                 }
 
                 i++;

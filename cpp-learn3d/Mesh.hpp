@@ -71,7 +71,7 @@ public:
         return m_faces;
     }
 
-    std::vector<unsigned int>& getFaceSortBuffer()
+    const std::vector<unsigned int>& getFaceSortBuffer()
     {
         return m_facesortbuffer;
     }
@@ -112,7 +112,7 @@ private:
     }
 
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo,
-        const std::vector<Vec2>& uvdata, const std::vector<mesh_face_uv_t>& faceuvinfo)
+         const std::vector<Vec2>& uvdata, const std::vector<mesh_face_uv_t>& faceuvinfo)
         : m_vertices(vertexdata)
         , m_uvs(uvdata)
         , m_faces(faceinfo)
