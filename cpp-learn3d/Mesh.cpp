@@ -67,7 +67,7 @@ Mesh Mesh::loadMesh(std::string filename)
                 }
 
                 fv[i] = std::stoi(fptokens[0].c_str()) - 1;
-                printf("fptokens size = %d\n", fptokens.size());
+                printf("fptokens size = %d\n", static_cast<int>(fptokens.size()));
 
                 switch (fptokens.size()) {
                 case 1:
@@ -103,7 +103,7 @@ void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& ca
         const Vec3& eye = camera.getOrigin();
         Vec3 v1, v2, v3;
         getMeshFaceVertices(facenum, v1, v2, v3);
-        const Vec3 tcp = tmat * eye;
+        /* const Vec3 tcp = tmat * eye; */
         const Vec3 maxtv
             = Vec3(std::max(v1.x, std::max(v2.x, v3.x)),
                 std::max(v1.y, std::max(v2.y, v3.y)),

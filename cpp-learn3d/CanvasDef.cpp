@@ -22,9 +22,10 @@ void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
         }
     }
 
-    SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32, m_width * 4); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
+    SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32.data(), m_width * 4); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
 }
 
+#if BITMAP_HPP_INCLUDED
 void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
 {
     // figure out clipping
@@ -96,11 +97,12 @@ void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty)
                   sprite_src_x = axB;
 
         byte* const canvasRowBegin = &m_pixels[(canvas_dest_y * width()) + canvas_dest_x];
-        const byte* const spriteRowBegin = bitmap.pixelPtrAt(sprite_src_x, sprite_src_y);
+        byte* spriteRowBegin = bitmap.pixelPtrAt(sprite_src_x, sprite_src_y);
 
         memcpy(canvasRowBegin, spriteRowBegin, s_across_x);
     }
 }
+#endif // BITMAP_HPP_INCLUDED
 
 void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
 {
@@ -110,6 +112,7 @@ void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
               uy = std::max(y1, y2),
               rectWidth = ux - lx,
               rectHeight = uy - ly;
+
     // figure out clipping
     const int canvW = width(),
               canvH = height(),
@@ -124,8 +127,8 @@ void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
 
     const int bdx = std::max<int>(lx, 0), // beginning X offset of dest canvas
         bdy = std::max<int>(ly, 0), // beginning Y offset of dest canvas
-        axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
-        ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
+        // axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
+        // ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
         s_across_x = endSpriteClippedX - topSpriteClippedX, s_across_y = endSpriteClippedY - topSpriteClippedY;
 
     if (s_across_x <= 0) {

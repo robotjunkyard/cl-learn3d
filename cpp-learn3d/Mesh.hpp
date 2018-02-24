@@ -101,7 +101,10 @@ public:
 private:
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo)
         : m_vertices(vertexdata)
+        , m_uvs({})
         , m_faces(faceinfo)
+        , m_faces_uv({})
+        , m_facesortbuffer({})
     {
         m_facesortbuffer.reserve(m_faces.size());
         for (unsigned int i = 0; i < m_faces.size(); i++)
@@ -114,6 +117,7 @@ private:
         , m_uvs(uvdata)
         , m_faces(faceinfo)
         , m_faces_uv(faceuvinfo)
+        , m_facesortbuffer({})
     {
         m_facesortbuffer.reserve(m_faces.size());
         for (unsigned int i = 0; i < m_faces.size(); i++)

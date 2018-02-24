@@ -35,7 +35,6 @@ public:
 
     Quat& normalize()
     {
-        const float sum = w + x + y + z;
         const float div = sqrt((w * w) + (x * x) + (y * y) + (z * z));
         w /= div;
         x /= div;

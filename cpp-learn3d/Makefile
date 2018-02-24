@@ -11,9 +11,6 @@ all: $(OBJS)
 main.o: main.cpp
 	$(CPPC) $(CPPFLAGS) -c main.cpp
 
-Vec.o: Vec.cpp
-	$(CPPC) $(CPPFLAGS) -c Vec.cpp
-
 Render.o: Render.cpp
 	$(CPPC) $(CPPFLAGS) -c Render.cpp
 
@@ -25,9 +22,6 @@ CanvasDef.o: CanvasDef.cpp
 
 canvas8.o: canvas8.cpp
 	$(CPPC) $(CPPFLAGS) -c canvas8.cpp
-
-Quat.o: Quat.cpp
-	$(CPPC) $(CPPFLAGS) -c Quat.cpp
 
 Camera.o: Camera.cpp
 	$(CPPC) $(CPPFLAGS) -c Camera.cpp

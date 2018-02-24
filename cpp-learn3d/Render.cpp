@@ -28,7 +28,6 @@ void Render::drawFlat3DTriangle(Canvas& canvas,
 
     const int w = canvas.width(),
               h = canvas.height();
-    const int m = std::min(w, h);
     const float cnear = camera.getNear();
 
     const std::function<float(float)> rfunc = &ceilf;

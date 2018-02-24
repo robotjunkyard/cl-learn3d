@@ -6,7 +6,7 @@
 #pragma warning(pop)
 #endif
 
-#include "Bitmap.hpp"
+/*  #include "Bitmap.hpp"  */
 #include "Camera.hpp"
 #include "CanvasDef.hpp"
 #include "Mat.hpp"
@@ -108,13 +108,13 @@ int main(int argc, char* argv[])
         // DO ALL THE DRAWING TO CANVAS HERE
         canvas.clear();
 
-        const Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
+        /* const Point canvasMousePos = ui.windowCoordinatesToCanvasCoordinates(Point(mouse_x, mouse_y),
             windowWidth,
             windowHeight,
             CANVAS_WIDTH,
             CANVAS_HEIGHT);
         const int cx = canvasMousePos.first,
-                  cy = canvasMousePos.second;
+                  cy = canvasMousePos.second; */
 
         {
             static float eyedelta = 0.0f;

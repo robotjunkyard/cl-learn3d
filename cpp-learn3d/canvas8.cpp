@@ -1,5 +1,5 @@
 #include "canvas8.hpp"
-#include "Bitmap.hpp"
+/*  #include "Bitmap.hpp"  */
 #include "CanvasDef.hpp"
 #include <array>
 

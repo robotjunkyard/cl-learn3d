@@ -1,5 +1,7 @@
 #pragma once
 
+#define BITMAP_HPP_INCLUDED
+
 #include "canvas8.hpp"
 #include <cstdio>
 #include <cstring>

@@ -1,9 +1,12 @@
+// CanvasDef.hpp - Feb 2018 revision
+
 #pragma once
 #include "SDL2/SDL.h"
 #include <algorithm>
+#include <vector>
 #include <array>
 
-#include "Bitmap.hpp"
+/*  #include "Bitmap.hpp"  */
 #include "canvas8.hpp"
 
 struct SDL_Texture;
@@ -73,29 +76,23 @@ class Canvas;
 class Canvas {
 public:
     Canvas(Palette& palette, int width, int height)
-        : m_width(width)
+        : m_pixels(std::vector<byte>(std::max(0, width) * std::max(0, height)))
+        , m_destPixels32(std::vector<uint32_t>(std::max(0, width) * std::max(0, height)))
+        , m_width(width)
         , m_height(height)
         , m_palette(palette)
     {
         if (!((width > 0) && (height > 0)))
             throw std::bad_alloc(); // bad_array_new_length();
 
-        m_pixels = new byte[width * height];
-        if (!m_pixels)
+        if (m_pixels.size() == 0)
             throw std::bad_alloc();
-        m_destPixels32 = new uint32_t[width * height];
-        if (!m_destPixels32)
+        if (m_destPixels32.size() == 0)
             throw std::bad_alloc();
-
-        memset(m_pixels, 0, width * height * sizeof(m_pixels[0]));
-        memset(m_destPixels32, 0, width * height * sizeof(m_destPixels32[0]));
     }
 
     ~Canvas()
-    {
-        delete[] m_destPixels32;
-        delete[] m_pixels;
-    }
+    {    }
 
     void setPixel(int x, int y, byte color)
     {
@@ -104,7 +101,8 @@ public:
 
     void clear(byte color = 1)
     {
-        memset(m_pixels, color, width() * height() * sizeof(m_pixels[0]));
+        for (auto& i : m_pixels)
+            i = color;
     }
 
     byte getPixel(int x, int y) const
@@ -113,6 +111,8 @@ public:
     }
 
     void updateSDLTexture(SDL_Texture* sdlTexture) const;
+
+    #ifdef BITMAP_HPP_INCLUDED
     void blitBitmap(const Bitmap& source, int destx, int desty, bool transparent = true)
     {
         if (transparent)
@@ -120,6 +120,7 @@ public:
         else
             blitBitmapNonmasked(source, destx, desty);
     }
+    #endif
 
     void drawHorizLine(int x1, int y, int x2, byte color);
     void drawRect(int x1, int y1, int x2, int y2, byte color);
@@ -135,11 +136,13 @@ public:
     }
 
 private:
+    #ifdef BITMAP_HPP_INCLUDED
     void blitBitmapMasked(const Bitmap& source, int destx, int desty);
     void blitBitmapNonmasked(const Bitmap& source, int destx, int desty);
+    #endif // BITMAP_HPP_INCLUDED
 
-    byte* m_pixels;
-    uint32_t* m_destPixels32;
+    std::vector<byte> m_pixels;
+    mutable std::vector<uint32_t> m_destPixels32;  // intermediate 8->32->SDL scratchpad buffer
     int m_width, m_height;
     Palette m_palette;
 };

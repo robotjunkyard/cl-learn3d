@@ -1,5 +1,5 @@
 #include "UI.hpp"
-#include "Bitmap.hpp"
+/*  #include "Bitmap.hpp"  */
 #include "CanvasDef.hpp"
 
 UI::UI(Canvas& canvas)

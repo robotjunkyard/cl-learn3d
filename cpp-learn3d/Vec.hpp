@@ -380,5 +380,5 @@ inline float comparativeVertexDistance(const Vec3& a, const Vec3& b)
                 ayby = a.y - b.y,
                 azbz = a.z - b.z,
                 result = (axbx * axbx) + (ayby * ayby) + (azbz * azbz);
-    return abs(result);
+    return fabs(result);
 }

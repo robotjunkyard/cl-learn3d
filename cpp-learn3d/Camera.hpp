@@ -18,7 +18,9 @@ public:
     Camera(int xres, int yres,
         const Vec3& origin, const Vec3& target, const Vec3& up = Vec3(0.0f, 1.0f, 0.0f),
         float fov = 120.0f, float near = 0.5f, float far = 100.0f)
-        : m_origin(origin)
+        : m_viewMatrix()
+        , m_projMatrix()
+        , m_origin(origin)
         , m_target(target)
         , m_up(up)
         , m_fov(fov)
