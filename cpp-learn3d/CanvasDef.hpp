@@ -6,7 +6,7 @@
 #include <vector>
 #include <array>
 
-/*  #include "Bitmap.hpp"  */
+#include "Bitmap.hpp"
 #include "canvas8.hpp"
 
 struct SDL_Texture;
@@ -61,6 +61,9 @@ public:
     {
         return (_colors[index].as_uint32());
     }
+
+    //! Find an indexed color closest to the specified arbitrary one, returning the index
+    std::pair<const color_t&, byte> findApproximateColor(color_t color) const;
 
 private:
     std::array<color_t, 256> withRedBlueSwapped(const std::array<color_t, 256>& other)
@@ -132,12 +135,13 @@ public:
 
     void drawHorizLine(int x1, int y, int x2, byte color);
     void drawRect(int x1, int y1, int x2, int y2, byte color);
-    void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color);
+    void drawFlatTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color);
 
     int width() const
     {
         return m_width;
     }
+
     int height() const
     {
         return m_height;

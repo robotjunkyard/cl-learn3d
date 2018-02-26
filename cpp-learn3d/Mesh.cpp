@@ -6,9 +6,12 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <memory>
 
-Mesh Mesh::loadMesh(std::string filename)
+Mesh Mesh::loadMesh(const std::string& meshname)
 {
+    const std::string filename = "models/" + meshname + ".obj";
+
     std::vector<Vec3> vertexdata;
     std::vector<mesh_face_t> facedata;
     std::vector<mesh_face_uv_t> faceuvdata;
@@ -38,14 +41,14 @@ Mesh Mesh::loadMesh(std::string filename)
             const float x = std::stof(tokens[1].c_str());
             const float y = std::stof(tokens[2].c_str());
             const float z = std::stof(tokens[3].c_str());
-            printf("Vertex %d: %f, %f, %f\n", vertn, x, y, z);
+            // printf("Vertex %d: %f, %f, %f\n", vertn, x, y, z);
             vertexdata.push_back(Vec3(x, y, z));
             vertn++;
         } else if (directive == "vt") {
             const float u = std::stof(tokens[1].c_str());
             const float v = 1.0f - std::stof(tokens[2].c_str());
             uvdata.push_back(Vec2(u, v));
-            printf("UV %d: %f, %f\n", uvn, u, v);
+            // printf("UV %d: %f, %f\n", uvn, u, v);
             uvn++;
         } else if (directive == "f") {
             std::string fparams[3] = { tokens[1], tokens[2], tokens[3] };
@@ -65,12 +68,12 @@ Mesh Mesh::loadMesh(std::string filename)
                 const f_tokenizer f_tok(fparam, f_sep);
                 std::vector<std::string> fptokens;
                 for (auto beg = f_tok.begin(); beg != f_tok.end(); ++beg) {
-                    printf("pushing %s\n", (*beg).c_str());
+                    // printf("pushing %s\n", (*beg).c_str());
                     fptokens.push_back(*beg);
                 }
 
                 fv[i] = std::stoi(fptokens[0].c_str()) - 1;
-                printf("fptokens size = %d\n", static_cast<int>(fptokens.size()));
+                // printf("fptokens size = %d\n", static_cast<int>(fptokens.size()));
 
                 switch (fptokens.size()) {
                 case 1:
@@ -86,22 +89,22 @@ Mesh Mesh::loadMesh(std::string filename)
                 i++;
             }
 
-            printf("Face %d: %d, %d, %d\n", facen, fv[0], fv[1], fv[2]);
+            // printf("Face %d: %d, %d, %d\n", facen, fv[0], fv[1], fv[2]);
             facedata.push_back(mesh_face_t{ fv[0], fv[1], fv[2] });
             if (f_has_uvs)
                 faceuvdata.push_back(mesh_face_uv_t{ fuv[0], fuv[1], fuv[2] });
             facen++;
         } else {
-            printf("Unknown/Unsupported directive '%s'\n", directive.c_str());
+            // printf("Unknown/Unsupported directive '%s'\n", directive.c_str());
         }
     }
 
-    return Mesh(vertexdata, facedata, uvdata, faceuvdata);
+    return Mesh(vertexdata, facedata, uvdata, faceuvdata, meshname);
 }
 
+// TODO: err, what was I going to do with tmat?
 void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& camera) const
 {
-    // triangle sort valuator lambda
     auto triSortValuator = [&](int facenum) -> float {
         const Vec3& eye = camera.getOrigin();
         Vec3 v1, v2, v3;
@@ -115,4 +118,26 @@ void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& ca
     };
 
     pQuicksort<unsigned int, float>(m_facesortbuffer, 0, m_facesortbuffer.size() - 1, triSortValuator);
+}
+
+std::unique_ptr<Bitmap> Mesh::loadTexture(const std::string& meshname) const
+{
+    // ugh
+    const std::string partialfilename = meshname + ".data";
+    const std::string fullfilename = "models/" + partialfilename;
+
+    // There are a dozen things wrong with how all of this is designed.
+    // Will update when more important TODO items are completed.
+
+    printf("Mesh::loadTexture probe for '%s': ", fullfilename.c_str());
+    std::ifstream f(fullfilename);
+    if (!f.good())
+    {
+        printf("NOT FOUND\n");
+        return nullptr;
+    }
+
+    printf("OK\n");
+
+    return std::unique_ptr<Bitmap>(new Bitmap(256, 256, partialfilename, "models"));
 }

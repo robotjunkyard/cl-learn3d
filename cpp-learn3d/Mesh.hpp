@@ -1,8 +1,11 @@
 #pragma once
+
 #include "PredicateQuicksort.hpp"
 #include "Vec.hpp"
+#include "Bitmap.hpp"
 #include <memory>
 #include <vector>
+#include <numeric>
 
 class Camera;
 struct Mat;
@@ -65,13 +68,14 @@ private:
 
 class Mesh {
 public:
-    static Mesh loadMesh(std::string filename);
+    static Mesh loadMesh(const std::string& meshname);
+
     const std::vector<mesh_face_t>& getFaces() const
     {
         return m_faces;
     }
 
-    const std::vector<unsigned int>& getFaceSortBuffer()
+    const std::vector<unsigned int>& getFaceSortBuffer() const
     {
         return m_facesortbuffer;
     }
@@ -89,6 +93,11 @@ public:
         ov2 = m_vertices[face.getV2()];
     }
 
+    const Bitmap* const getTexture() const
+    {
+        return m_texture.get();
+    }
+
     // Sorts a mesh's draw-order buffer according to transformation matrix and camera orientation
     // This is const because it is not something that alters first-class data, only the draw order
     // which is considered highly mutable second-class data that is not specific to the information
@@ -104,31 +113,39 @@ private:
         , m_uvs({})
         , m_faces(faceinfo)
         , m_faces_uv({})
-        , m_facesortbuffer({})
+        , m_facesortbuffer(defaultFaceSortBuffer(m_faces.size()))
+        , m_texture(nullptr)
     {
-        m_facesortbuffer.reserve(m_faces.size());
-        for (unsigned int i = 0; i < m_faces.size(); i++)
-            m_facesortbuffer.push_back(i);
     }
 
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo,
-         const std::vector<Vec2>& uvdata, const std::vector<mesh_face_uv_t>& faceuvinfo)
+         const std::vector<Vec2>& uvdata, const std::vector<mesh_face_uv_t>& faceuvinfo,
+         const std::string& textureFilename)
         : m_vertices(vertexdata)
         , m_uvs(uvdata)
         , m_faces(faceinfo)
         , m_faces_uv(faceuvinfo)
-        , m_facesortbuffer({})
+        , m_facesortbuffer(defaultFaceSortBuffer(m_faces.size()))
+        , m_texture(std::move(loadTexture(textureFilename)))
     {
-        m_facesortbuffer.reserve(m_faces.size());
-        for (unsigned int i = 0; i < m_faces.size(); i++)
-            m_facesortbuffer.push_back(i);
     }
+
+    static std::vector<unsigned int> defaultFaceSortBuffer(int count)
+    {
+        std::vector<unsigned int> buf(count);
+        std::iota(buf.begin(), buf.end(), 0);  // fill with range 0..count
+        return buf;
+    }
+
+    std::unique_ptr<Bitmap> loadTexture(const std::string& filename) const;
 
     const std::vector<Vec3> m_vertices;
     const std::vector<Vec2> m_uvs; // optional
     const std::vector<mesh_face_t> m_faces;
     const std::vector<mesh_face_uv_t> m_faces_uv; // optional
 
-    // rendering-related data
+    // rendering-related scratchpad-ish data
     mutable std::vector<unsigned int> m_facesortbuffer; // indices of faces, frequently re-sorted per frame
+
+    std::unique_ptr<Bitmap> m_texture;
 };

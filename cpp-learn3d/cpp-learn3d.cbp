@@ -41,13 +41,24 @@
 			<Add option="-m64" />
 			<Add option="`sdl2-config --libs`" />
 		</Linker>
+		<Unit filename="Bitmap.hpp" />
 		<Unit filename="Camera.cpp" />
+		<Unit filename="Camera.hpp" />
 		<Unit filename="CanvasDef.cpp" />
+		<Unit filename="CanvasDef.hpp" />
 		<Unit filename="Mat.cpp" />
+		<Unit filename="Mat.hpp" />
 		<Unit filename="Mesh.cpp" />
+		<Unit filename="Mesh.hpp" />
+		<Unit filename="PredicateQuicksort.hpp" />
+		<Unit filename="Quat.hpp" />
 		<Unit filename="Render.cpp" />
+		<Unit filename="Render.hpp" />
 		<Unit filename="UI.cpp" />
+		<Unit filename="UI.hpp" />
+		<Unit filename="Vec.hpp" />
 		<Unit filename="canvas8.cpp" />
+		<Unit filename="canvas8.hpp" />
 		<Unit filename="cb.bmp" />
 		<Unit filename="main.cpp" />
 		<Extensions>

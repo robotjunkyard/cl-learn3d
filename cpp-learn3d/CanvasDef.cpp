@@ -25,7 +25,7 @@ void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
     SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32.data(), m_width * sizeof(m_destPixels32[0])); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
 }
 
-#if BITMAP_HPP_INCLUDED
+#ifdef BITMAP_HPP_INCLUDED
 void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
 {
     // figure out clipping
@@ -97,7 +97,7 @@ void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty)
                   sprite_src_x = axB;
 
         byte* const canvasRowBegin = &m_pixels[(canvas_dest_y * width()) + canvas_dest_x];
-        byte* spriteRowBegin = bitmap.pixelPtrAt(sprite_src_x, sprite_src_y);
+        const byte* const spriteRowBegin = bitmap.pixelPtrAt(sprite_src_x, sprite_src_y);
 
         memcpy(canvasRowBegin, spriteRowBegin, s_across_x);
     }
@@ -165,7 +165,7 @@ void Canvas::drawHorizLine(int x1, int y, int x2, byte color)
     TRIDBGMSG("OK\n");
 }
 
-void Canvas::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color)
+void Canvas::drawFlatTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color)
 {
     int topx = x1, topy = y1,
         midx = x2, midy = y2,
@@ -230,10 +230,27 @@ draw_lower:
     TRIDBGMSG("Tri OK\n");
 }
 
-/*void Palette::swapRedBlue()
+//! Find an indexed color closest to the specified arbitrary one, returning the index
+std::pair<const color_t&, byte> Palette::findApproximateColor(color_t color) const
 {
-    for (auto& color : _colors)
-        std::swap(color.r, color.b);
-    for (auto& color : _initColors)
-        std::swap(color.r, color.b);
-}*/
+    int mindiff = std::numeric_limits<int>::max();
+    int idx = 0;  // what ultimately gets returned
+
+    for (byte i = 0; i < _colors.size(); i++)
+    {
+        const color_t& icolor = getColor(i);
+        const int diff = std::abs(icolor.r - color.r) +
+                         std::abs(icolor.g - color.g) +
+                         std::abs(icolor.b - color.b);
+        if (0 == diff)
+            return { icolor, idx };
+
+        if (diff < mindiff)
+        {
+            mindiff = diff;
+            idx = i;
+        }
+    }
+
+    return { getColor(idx), idx };
+}

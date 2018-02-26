@@ -46,10 +46,10 @@ int main(int argc, char* argv[])
     if (argc == 2)
         meshname = argv[1];
     if (meshname == "")
-        meshname = "spaceship"; //"matorb";
+        meshname = "obelisk";
 
-    const std::string fullpath = std::string("models/") + meshname + ".obj";
-    const Mesh mesh = Mesh::loadMesh(fullpath);
+    const Mesh mesh = Mesh::loadMesh(meshname);
+    const auto* const meshtexture = mesh.getTexture();
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -128,10 +128,11 @@ int main(int argc, char* argv[])
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 2.0f));
-            camera.setPerspectiveProjection(90.0f, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(40.0f, 0.1f, 10.0f);
         }
 
-        Render::drawMesh(canvas, camera, mesh);
+        canvas.blitBitmap(*mesh.getTexture(), 4, 16);
+        Render::drawMeshFlat(canvas, camera, mesh);
 
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
         SDL_RenderCopy(renderer, texture, NULL, NULL);
