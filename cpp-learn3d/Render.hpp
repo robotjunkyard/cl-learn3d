@@ -18,13 +18,15 @@ public:
 
     static void drawMeshTriangle(Canvas& canvas, const Mesh& mesh, int facenum,
                                  int x1, int y1, int x2, int y2, int x3, int y3);
-    static void drawMeshFace(Canvas& canvas,
-                             const Camera& camera,
-                             const Mesh& mesh,
-                             int facenum,
-                             const Vec3& v1, const Vec3& v2, const Vec3& v3, // world-space vertices
-                             const Mat& tmat,
-                             bool cullBackfaces = true);
+
+    static void drawMeshTriangleTextured (Canvas& canvas, const Mesh& mesh, int facenum,
+                                      const Triangle2& uvtri,
+                                      int x1, int y1, int x2, int y2, int x3, int y3);
+    static void drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera& camera,
+                                     const Mat& tmat,
+                                     int facenum,
+                                     const Triangle3& faceTri, const Triangle2& uvTri,
+                                     bool cullBackfaces);
 
     /* static void drawMeshTriangle(Canvas& canvas, const Camera& camera, const Mesh& mesh,
                               const Vec3& v1, const Vec3& v2, const Vec3& v3, // world-space vertices

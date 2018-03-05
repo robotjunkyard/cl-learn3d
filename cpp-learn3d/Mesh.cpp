@@ -107,13 +107,11 @@ void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& ca
 {
     auto triSortValuator = [&](int facenum) -> float {
         const Vec3& eye = camera.getOrigin();
-        Vec3 v1, v2, v3;
-        getMeshFaceVertices(facenum, v1, v2, v3);
-        /* const Vec3 tcp = tmat * eye; */
+        const Triangle3 tri = getMeshFaceVertices(facenum);
         const Vec3 maxtv
-            = Vec3(std::max(v1.x, std::max(v2.x, v3.x)),
-                std::max(v1.y, std::max(v2.y, v3.y)),
-                std::max(v1.z, std::max(v2.z, v3.z)));
+            = Vec3(std::max(tri.a.x, std::max(tri.b.x, tri.c.x)),
+                   std::max(tri.a.y, std::max(tri.b.y, tri.c.y)),
+                   std::max(tri.a.z, std::max(tri.b.z, tri.c.z)));
         return comparativeVertexDistance(-eye, maxtv);
     };
 

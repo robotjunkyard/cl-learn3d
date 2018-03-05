@@ -132,8 +132,8 @@ int main(int argc, char* argv[])
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
-                Vec3(0.0f, 0.0f, 2.0f));
-            camera.setPerspectiveProjection(40.0f, 0.1f, 10.0f);
+                Vec3(0.0f, 0.0f, 1.0f));
+            camera.setPerspectiveProjection(27.5f, 0.1f, 10.0f);
         }
 
         // determine mouse cursor position in canvas
@@ -144,7 +144,8 @@ int main(int argc, char* argv[])
 
         canvas.blitBitmap(*mesh.getTexture(), 4, 16);
         canvas.drawFlatTriangle(testTri, bary.allGTE(0.0f) ? 12 : 4);
-        Render::drawMeshFlat(canvas, camera, mesh);
+        //Render::drawMeshFlat(canvas, camera, mesh);
+        Render::drawMeshTextured(canvas, camera, mesh);
 
         canvas.blitBitmap(cursorpic, mcurpos.x, mcurpos.y);
         printf("%f, %f, %f\n", bary.x, bary.y, bary.z);

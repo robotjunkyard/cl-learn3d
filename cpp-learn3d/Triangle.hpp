@@ -44,4 +44,30 @@ public:
     }
 
     Vec3 barycentricCoordinates(const Vec2& point) const;
+    Vec2 pointFromBarycentric(const Vec3& barycoord) const;
 };
+
+
+class Triangle3
+{
+public:
+    Triangle3 (float ax, float ay, float az,
+               float bx, float by, float bz,
+               float cx, float cy, float cz)
+        : a(ax,ay,az)
+        , b(bx,by,bz)
+        , c(cx,cy,cz)
+    { }
+
+    Triangle3 (const Vec3& a, const Vec3& b, const Vec3& c)
+        : a(a)
+        , b(b)
+        , c(c)
+    { }
+
+    Vec3 a, b, c;
+
+    // TODO?
+    // Vec3 barycentricCoordinates(const Vec3& point) const
+};
+

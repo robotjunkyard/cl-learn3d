@@ -135,22 +135,140 @@ draw_lower:
 }
 
 
-void Render::drawMeshFace(Canvas& canvas,
-                          const Camera& camera,
-                          const Mesh& mesh,
-                          int facenum,
-                          const Vec3& v1, const Vec3& v2, const Vec3& v3, // world-space vertices
-                          const Mat& tmat,
-                          bool cullBackfaces)
+void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh, int facenum,
+                                      const Triangle2& uvtri,
+                                      int x1, int y1, int x2, int y2, int x3, int y3)
+{
+    // previous functions leading up to this one should have already
+    // assured a bitmap exists
+    const Bitmap* const bitmap = mesh.getTexture();
+    const auto tex_w = bitmap->width(),
+           tex_h = bitmap->height();
+
+    const Triangle2 screenTri = Triangle2(x1, y1, x2, y2, x3, y3);
+
+    int topx = x1, topy = y1,
+        midx = x2, midy = y2,
+        btmx = x3, btmy = y3;
+
+    if (topy > midy)
+        swap2pair(topx, midx, topy, midy);
+    if (topy > btmy)
+        swap2pair(topx, btmx, topy, btmy);
+    if (midy > btmy)
+        swap2pair(midx, btmx, midy, btmy);
+
+    // TRIDBGMSG("--- tri (%d, %d)-(%d, %d)-(%d, %d) ---\n", topx, topy, midx, midy, btmx, btmy);
+
+    const int x_mid_sub_top = midx - topx,
+              x_btm_sub_top = btmx - topx,
+              x_btm_sub_mid = btmx - midx,
+              y_mid_sub_top = midy - topy,
+              y_btm_sub_top = btmy - topy,
+              y_btm_sub_mid = btmy - midy;
+
+    if ((0 == y_btm_sub_top) || (btmy < 0) || (topy >= canvas.height())) {
+        // TRIDBGMSG("Tri FAIL(*)\n");
+        return;
+    }
+
+    const float dlong = static_cast<float>(x_btm_sub_top) / static_cast<float>(y_btm_sub_top);
+
+    float sx0 = static_cast<float>(topx),
+          sx1 = sx0;
+
+    if (0 == y_mid_sub_top)
+        goto draw_lower;
+
+    /* must enclose this below section in brackets, else clang whines about 'goto' above */
+    {
+        const float dupper = static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top);
+        // TRIDBGMSG("UPPER:  dupper = %f\n", dupper);
+        //  --- draw upper sub-triangle ---
+
+        // for each row...
+        for (int yi = topy,
+                 yiend = std::min(midy, canvas.height());
+             yi < yiend;
+             yi++) {
+            // drawHorizLine(static_cast<int>(sx0), yi, static_cast<int>(sx1), color);
+            // and for each pixel in that row...
+            if (yi >= 0 && yi < yiend)
+                for (int xi = static_cast<int>(std::max(0.0f, sx0));
+                         xi < std::min(static_cast<float>(canvas.width()), sx1);
+                         xi++)
+                {
+                    const Vec2 pixelvec = { static_cast<float>(xi), static_cast<float>(yi) };
+                    const Vec3 baryc = screenTri.barycentricCoordinates(pixelvec);
+                    const Vec2 cartuv = uvtri.pointFromBarycentric(baryc);
+
+                    const int src_uv_x = static_cast<int>(tex_w * cartuv.x) % tex_w,
+                              src_uv_y = static_cast<int>(tex_h * cartuv.y) % tex_h;
+
+                    const auto color = bitmap->pixelAt(src_uv_x, src_uv_y);
+                    canvas.setPixel(xi, yi, color);
+                }
+
+            sx0 += dupper;
+            sx1 += dlong;
+        }
+    }
+
+    // do same but to draw lower sub-triangle
+draw_lower:
+    if (0 == y_btm_sub_mid) {
+        // TRIDBGMSG("Tri OK(U)\n");
+        return; // no need to draw lower sub-triangle
+    }
+
+    const float dlower = static_cast<float>(x_btm_sub_mid) / static_cast<float>(y_btm_sub_mid);
+    // TRIDBGMSG("LOWER:  dlower = %f\n", dlower);
+    sx0 = static_cast<float>(midx);
+
+    // for each row...
+    for (int yi = midy,
+             yiend = std::min(btmy, canvas.height());
+             yi < yiend;
+             yi++) {
+        // drawHorizLine(static_cast<int>(sx0), yi, static_cast<int>(sx1), color);
+        // and for each pixel in that row...
+        if (yi >= 0 && yi < yiend)
+            for (int xi = static_cast<int>(std::max(0.0f, sx0));
+                     xi < std::min(static_cast<float>(canvas.width()), sx1);
+                     xi++)
+            {
+                const Vec2 pixelvec = { static_cast<float>(xi), static_cast<float>(yi) };
+                const Vec3 baryc = screenTri.barycentricCoordinates(pixelvec);
+                const Vec2 cartuv = uvtri.pointFromBarycentric(baryc);
+
+                const int src_uv_x = static_cast<int>(tex_w * cartuv.x) % tex_w,
+                          src_uv_y = static_cast<int>(tex_h * cartuv.y) % tex_h;
+
+                const auto color = bitmap->pixelAt(src_uv_x, src_uv_y);
+                canvas.setPixel(xi, yi, color);
+            }
+
+        sx0 += dlower;
+        sx1 += dlong;
+    }
+
+    // TRIDBGMSG("Tri OK\n");
+}
+
+
+void Render::drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera& camera,
+                                  const Mat& tmat, int facenum,
+                                  const Triangle3& faceTri, const Triangle2& uvTri,
+                                  bool cullBackfaces)
 {
     if ((facenum < 0) || (facenum > mesh.getFaces().size()))
         return;
 
     // Perf TODO: probably better to do this in one clustered batch for all world geometry
     // to a buffer full of screen-space triangles, and then actually draw from that buffer
-    const Vec3 tv1 = tmat * v1,
-               tv2 = tmat * v2,
-               tv3 = tmat * v3,
+    const Vec3 tv1 = tmat * faceTri.a,
+               tv2 = tmat * faceTri.b,
+               tv3 = tmat * faceTri.c,
                camv = tmat * (camera.getTarget() - camera.getOrigin());
 
     if (cullBackfaces && (Vec3::dot(camv, calculateTriNormal(tv1, tv2, tv3)) >= 0.0f))
@@ -170,7 +288,9 @@ void Render::drawMeshFace(Canvas& canvas,
 
     const bool isFacingCamera = (!((sx1 < 0) && (sx1 > w) && (sx2 < 0) && (sx2 > w) && (sx3 < 0) && (sx3 > w) && (sy1 < 0) && (sy1 > h) && (sy2 < 0) && (sy2 > h) && (sy3 < 0) && (sy3 > h)));
     if (isFacingCamera)
-        drawMeshTriangle(canvas, mesh, facenum, sx1, sy1, sx2, sy2, sx3, sy3);
+        drawMeshTriangleTextured(canvas, mesh, facenum,
+                                 uvTri,
+                                 sx1, sy1, sx2, sy2, sx3, sy3);
 }
 
 void Render::drawMeshTextured(Canvas& canvas, const Camera& camera, const Mesh& mesh)
@@ -181,14 +301,18 @@ void Render::drawMeshTextured(Canvas& canvas, const Camera& camera, const Mesh& 
     const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix();
     mesh.sortMeshTriangleDrawOrderFromCamera(worldMatrix, camera);
 
-    for (const auto faceNum : mesh.getFaceSortBuffer()) {
+    for (const auto facenum : mesh.getFaceSortBuffer()) {
         // another less important but still necessary TODO: materials!
-        const byte color = 2 + (faceNum % 30);
-        Vec3 v1, v2, v3;
-        mesh.getMeshFaceVertices(faceNum, v1, v2, v3);
+        const byte color = 2 + (facenum % 30);
+        const Triangle3 tri = mesh.getMeshFaceVertices(facenum);
+        const Triangle2 uvtri = mesh.getMeshUVCoords(facenum);
 
         // BIG TODO: replace with drawMeshFace(...)
-        drawFlat3DTriangle(canvas, camera, color, v1, v2, v3, worldMatrix);
+        drawTexturedMeshFace(canvas, mesh, camera,
+                             worldMatrix,
+                             facenum,
+                             tri, uvtri,
+                             false);
     }
 }
 

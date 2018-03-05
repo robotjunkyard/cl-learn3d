@@ -3,9 +3,10 @@
 #include "PredicateQuicksort.hpp"
 #include "Vec.hpp"
 #include "Bitmap.hpp"
-#include <memory>
+#include "Triangle.hpp"
 #include <vector>
 #include <numeric>
+#include <memory>
 
 class Camera;
 struct Mat;
@@ -85,12 +86,28 @@ public:
         return m_vertices;
     }
 
-    void getMeshFaceVertices(const int faceIndex, Vec3& ov0, Vec3& ov1, Vec3& ov2) const
+    void getMeshFaceVertices(int faceIndex, Vec3& ov0, Vec3& ov1, Vec3& ov2) const
     {
         const auto& face = m_faces[faceIndex];
         ov0 = m_vertices[face.getV0()];
         ov1 = m_vertices[face.getV1()];
         ov2 = m_vertices[face.getV2()];
+    }
+
+    Triangle3 getMeshFaceVertices(int faceIndex) const
+    {
+        const auto& face = m_faces[faceIndex];
+        return Triangle3(m_vertices[face.getV0()],
+                         m_vertices[face.getV1()],
+                         m_vertices[face.getV2()]);
+    }
+
+    Triangle2 getMeshUVCoords(int faceIndex) const
+    {
+        const auto& uvface = m_faces_uv[faceIndex];
+        return Triangle2(m_uvs[uvface.getUV0()],
+                         m_uvs[uvface.getUV1()],
+                         m_uvs[uvface.getUV2()]);
     }
 
     const Bitmap* const getTexture() const

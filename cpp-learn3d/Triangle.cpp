@@ -14,3 +14,13 @@ Vec3 Triangle2::barycentricCoordinates(const Vec2& point) const
                ba = 1.0f - bb - bc;
     return Vec3(ba, bb, bc);
 }
+
+Vec2 Triangle2::pointFromBarycentric(const Vec3& barycoord) const
+{
+    const float u = barycoord.x,
+                v = barycoord.y,
+                w = barycoord.z;
+    const float x = (u * a.x) + (v * b.x) + (w * c.x),
+                y = (u * a.y) + (v * b.y) + (w * c.y);
+    return Vec2(x, y);
+}
