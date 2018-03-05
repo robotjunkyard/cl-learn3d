@@ -1,8 +1,9 @@
 #pragma once
 
+#include <limits>
 #include <cmath>
 
-inline bool feq(float a, float b, float epsilon = 1e-6f)
+inline bool feq(float a, float b, float epsilon = std::numeric_limits<float>::epsilon())
 {
     return fabs(a - b) < epsilon;
 }
@@ -227,7 +228,28 @@ public:
             y /= m;
             z /= m;
         }
+
         return *this;
+    }
+
+    bool allGTE(float c) const
+    {
+        return (x >= c) && (y >= c) && (z >= c);
+    }
+
+    bool allGT(float c) const
+    {
+        return (x > c) && (y > c) && (z > c);
+    }
+
+    bool allLTE(float c) const
+    {
+        return (x <= c) && (y <= c) && (z <= c);
+    }
+
+    bool allLT(float c) const
+    {
+        return (x < c) && (y < c) && (z < c);
     }
 
     float x, y, z;
@@ -263,6 +285,16 @@ public:
     static float dot(const Vec2& a, const Vec2& b)
     {
         return (a.x * b.x) + (a.y * b.y);
+    }
+
+    static Vec2 zeroVec()
+    {
+        return { 0.0f, 0.0f };
+    }
+
+    bool isZero() const
+    {
+        return (x == 0.0f) && (y == 0.0f);
     }
 
     Vec2& operator=(const Vec2& other)
@@ -328,6 +360,26 @@ public:
         return *this;
     }
 
+    bool allGTE(float c) const
+    {
+        return (x >= c) && (y >= c);
+    }
+
+    bool allGT(float c) const
+    {
+        return (x > c) && (y > c);
+    }
+
+    bool allLTE(float c) const
+    {
+        return (x <= c) && (y <= c);
+    }
+
+    bool allLT(float c) const
+    {
+        return (x < c) && (y < c);
+    }
+
     union {
         float x;
         float u;
@@ -382,3 +434,12 @@ inline float comparativeVertexDistance(const Vec3& a, const Vec3& b)
                 result = (axbx * axbx) + (ayby * ayby) + (azbz * azbz);
     return fabs(result);
 }
+
+inline float comparativeVertexDistance(const Vec2& a, const Vec2& b)
+{
+    const float axbx = a.x - b.x,
+                ayby = a.y - b.y,
+                result = (axbx * axbx) + (ayby * ayby);
+    return fabs(result);
+}
+

@@ -82,7 +82,8 @@ public:
     }
 
     byte pixelAt(int x, int y) const { return m_pixels[(y * m_width) + x]; }
-    byte* pixelPtrAt(int x, int y) const { return &m_pixels[(y * m_width) + x]; }
+    // byte* pixelPtrAt(int x, int y) { return &m_pixels[(y * m_width) + x]; }
+    const byte* const pixelPtrAt(int x, int y) const { return &m_pixels[(y * m_width) + x]; }
 
     unsigned int width() const { return m_width; }
     unsigned int height() const { return m_height; }

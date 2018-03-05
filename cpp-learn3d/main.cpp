@@ -16,6 +16,7 @@
 #include "Render.hpp"
 #include "UI.hpp"
 #include "canvas8.hpp"
+#include "Triangle.hpp"
 #include <cstdio>
 #include <vector>
 
@@ -34,6 +35,7 @@ int vtest(int i)
 
 int main(int argc, char* argv[])
 {
+    const Bitmap cursorpic(16, 16, "cursor.data");
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
         Vec3(3.0f, 3.0f, 0.0f),
         Vec3(0.0f, 0.0f, 0.0f),
@@ -42,14 +44,16 @@ int main(int argc, char* argv[])
         1.0f, // near
         80.0f); // far
 
+    Triangle2 testTri { {16, 64}, {CANVAS_WIDTH/2,CANVAS_HEIGHT - 64}, {384, 8} };
+
     std::string meshname = "";
     if (argc == 2)
         meshname = argv[1];
     if (meshname == "")
-        meshname = "spaceship"; //"matorb";
+        meshname = "obelisk";
 
-    const std::string fullpath = std::string("models/") + meshname + ".obj";
-    const Mesh mesh = Mesh::loadMesh(fullpath);
+    const Mesh mesh = Mesh::loadMesh(meshname);
+    const auto* const meshtexture = mesh.getTexture();
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -93,6 +97,7 @@ int main(int argc, char* argv[])
         const unsigned int ticksBeforeRender = SDL_GetTicks();
 
         int mouse_x, mouse_y;
+        SDL_PumpEvents();
         SDL_GetMouseState(&mouse_x, &mouse_y);
 
         while (SDL_PollEvent(&event)) {
@@ -128,11 +133,23 @@ int main(int argc, char* argv[])
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 2.0f));
-            camera.setPerspectiveProjection(90.0f, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(40.0f, 0.1f, 10.0f);
         }
 
-        Render::drawMesh(canvas, camera, mesh);
+        // determine mouse cursor position in canvas
+        const Vec2 mcurpos = { mouse_x / canvasToWindowScale, mouse_y / canvasToWindowScale };
 
+        // determine barycentric coords of debug triangle
+        const Vec3 bary = testTri.barycentricCoordinates(mcurpos);
+
+        canvas.blitBitmap(*mesh.getTexture(), 4, 16);
+        canvas.drawFlatTriangle(testTri, bary.allGTE(0.0f) ? 12 : 4);
+        Render::drawMeshFlat(canvas, camera, mesh);
+
+        canvas.blitBitmap(cursorpic, mcurpos.x, mcurpos.y);
+        printf("%f, %f, %f\n", bary.x, bary.y, bary.z);
+
+        // present to user
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
         SDL_RenderCopy(renderer, texture, NULL, NULL);
         SDL_RenderPresent(renderer);
