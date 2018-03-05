@@ -37,9 +37,9 @@ int main(int argc, char* argv[])
 {
     const Bitmap cursorpic(16, 16, "cursor.data");
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
-        Vec3(3.0f, 3.0f, 0.0f),
-        Vec3(0.0f, 0.0f, 0.0f),
+        Vec3(3.0f, 1.0f, 0.0f),
         Vec3(0.0f, 0.0f, 1.0f),
+        Vec3(0.0f, 0.0f, 0.0f),
         90.0f,
         1.0f, // near
         80.0f); // far
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
-            constexpr float h = 0.0f;
+            constexpr float h = 0.5f;
             const float eyex = 24 * sin(eyedelta),
                         eyey = 24 * cos(eyedelta),
                         eyez = 16.0f + h;
@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 1.0f));
-            camera.setPerspectiveProjection(27.5f, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(25.0f, 0.1f, 10.0f);
         }
 
         // determine mouse cursor position in canvas
@@ -144,11 +144,11 @@ int main(int argc, char* argv[])
 
         canvas.blitBitmap(*mesh.getTexture(), 4, 16);
         canvas.drawFlatTriangle(testTri, bary.allGTE(0.0f) ? 12 : 4);
-        //Render::drawMeshFlat(canvas, camera, mesh);
+        // Render::drawMeshFlat(canvas, camera, mesh);
         Render::drawMeshTextured(canvas, camera, mesh);
 
         canvas.blitBitmap(cursorpic, mcurpos.x, mcurpos.y);
-        printf("%f, %f, %f\n", bary.x, bary.y, bary.z);
+        // printf("%f, %f, %f\n", bary.x, bary.y, bary.z);
 
         // present to user
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
