@@ -53,7 +53,6 @@ int main(int argc, char* argv[])
         meshname = "obelisk";
 
     const Mesh mesh = Mesh::loadMesh(meshname);
-    const auto* const meshtexture = mesh.getTexture();
 
     Palette db32 = make_db32_Palette();
     Canvas canvas(db32, CANVAS_WIDTH, CANVAS_HEIGHT);
@@ -125,7 +124,7 @@ int main(int argc, char* argv[])
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
-            constexpr float h = 0.5f;
+            const float h = 0.5f+(0.2f*sin(eyedelta/4.0f));
             const float eyex = 24 * sin(eyedelta),
                         eyey = 24 * cos(eyedelta),
                         eyez = 16.0f + h;
@@ -133,11 +132,12 @@ int main(int argc, char* argv[])
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 1.0f));
-            camera.setPerspectiveProjection(25.0f, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(7.0f, 0.1f, 10.0f);
         }
 
         // determine mouse cursor position in canvas
-        const Vec2 mcurpos = { mouse_x / canvasToWindowScale, mouse_y / canvasToWindowScale };
+        const Vec2 mcurpos = { static_cast<float>(mouse_x / canvasToWindowScale),
+                               static_cast<float>(mouse_y / canvasToWindowScale) };
 
         // determine barycentric coords of debug triangle
         const Vec3 bary = testTri.barycentricCoordinates(mcurpos);

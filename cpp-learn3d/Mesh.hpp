@@ -76,7 +76,7 @@ public:
         return m_faces;
     }
 
-    const std::vector<unsigned int>& getFaceSortBuffer() const
+    const std::vector<unsigned short>& getFaceSortBuffer() const
     {
         return m_facesortbuffer;
     }
@@ -86,15 +86,15 @@ public:
         return m_vertices;
     }
 
-    void getMeshFaceVertices(int faceIndex, Vec3& ov0, Vec3& ov1, Vec3& ov2) const
+    /*void getMeshFaceVertices(int faceIndex, Vec3& ov0, Vec3& ov1, Vec3& ov2) const
     {
         const auto& face = m_faces[faceIndex];
         ov0 = m_vertices[face.getV0()];
         ov1 = m_vertices[face.getV1()];
         ov2 = m_vertices[face.getV2()];
-    }
+    }*/
 
-    Triangle3 getMeshFaceVertices(int faceIndex) const
+    Triangle3 getMeshFaceVertices(unsigned short faceIndex) const
     {
         const auto& face = m_faces[faceIndex];
         return Triangle3(m_vertices[face.getV0()],
@@ -102,7 +102,7 @@ public:
                          m_vertices[face.getV2()]);
     }
 
-    Triangle2 getMeshUVCoords(int faceIndex) const
+    Triangle2 getMeshUVCoords(unsigned short faceIndex) const
     {
         const auto& uvface = m_faces_uv[faceIndex];
         return Triangle2(m_uvs[uvface.getUV0()],
@@ -110,7 +110,7 @@ public:
                          m_uvs[uvface.getUV2()]);
     }
 
-    const Bitmap* const getTexture() const
+    const Bitmap* getTexture() const
     {
         return m_texture.get();
     }
@@ -147,9 +147,9 @@ private:
     {
     }
 
-    static std::vector<unsigned int> defaultFaceSortBuffer(int count)
+    static std::vector<unsigned short> defaultFaceSortBuffer(unsigned short count)
     {
-        std::vector<unsigned int> buf(count);
+        std::vector<unsigned short> buf(count);
         std::iota(buf.begin(), buf.end(), 0);  // fill with range 0..count
         return buf;
     }
@@ -162,7 +162,7 @@ private:
     const std::vector<mesh_face_uv_t> m_faces_uv; // optional
 
     // rendering-related scratchpad-ish data
-    mutable std::vector<unsigned int> m_facesortbuffer; // indices of faces, frequently re-sorted per frame
+    mutable std::vector<unsigned short> m_facesortbuffer; // indices of faces, frequently re-sorted per frame
 
     std::unique_ptr<Bitmap> m_texture;
 };

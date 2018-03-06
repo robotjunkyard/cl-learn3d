@@ -90,7 +90,11 @@ Mesh Mesh::loadMesh(const std::string& meshname)
             }
 
             // printf("Face %d: %d, %d, %d\n", facen, fv[0], fv[1], fv[2]);
-            facedata.push_back(mesh_face_t{ fv[0], fv[1], fv[2] });
+            if (facedata.size() < std::numeric_limits<unsigned short>::max())
+                facedata.push_back(mesh_face_t{ fv[0], fv[1], fv[2] });
+            else
+                throw std::runtime_error("may not exceed 65535 faces");
+
             if (f_has_uvs)
                 faceuvdata.push_back(mesh_face_uv_t{ fuv[0], fuv[1], fuv[2] });
             facen++;
@@ -108,14 +112,13 @@ void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& ca
     auto triSortValuator = [&](int facenum) -> float {
         const Vec3& eye = camera.getOrigin();
         const Triangle3 tri = getMeshFaceVertices(facenum);
-        const Vec3 maxtv
-            = Vec3(std::max(tri.a.x, std::max(tri.b.x, tri.c.x)),
-                   std::max(tri.a.y, std::max(tri.b.y, tri.c.y)),
-                   std::max(tri.a.z, std::max(tri.b.z, tri.c.z)));
+        const Vec3 maxtv = Vec3(std::max(tri.a.x, std::max(tri.b.x, tri.c.x)),
+                                std::max(tri.a.y, std::max(tri.b.y, tri.c.y)),
+                                std::max(tri.a.z, std::max(tri.b.z, tri.c.z)));
         return comparativeVertexDistance(-eye, maxtv);
     };
 
-    pQuicksort<unsigned int, float>(m_facesortbuffer, 0, m_facesortbuffer.size() - 1, triSortValuator);
+    pQuicksort<unsigned short, float>(m_facesortbuffer, 0, m_facesortbuffer.size() - 1, triSortValuator);
 }
 
 std::unique_ptr<Bitmap> Mesh::loadTexture(const std::string& meshname) const

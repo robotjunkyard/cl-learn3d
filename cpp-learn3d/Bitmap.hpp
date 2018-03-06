@@ -66,14 +66,9 @@ public:
         m_werePixelsCopied = copyPixels;
     }
 
-    //! Copy ctor
     Bitmap(const Bitmap& other)
-        : m_pixels(new byte[other.m_width * other.m_height])
-        , m_width(other.m_width)
-        , m_height(other.m_height)
-    {
-        memcpy(m_pixels, other.m_pixels, m_width * m_height);
-    }
+        : Bitmap(other.m_width, other.m_height, other.m_pixels, true)
+    { }
 
     ~Bitmap()
     {
@@ -83,10 +78,10 @@ public:
 
     byte pixelAt(int x, int y) const { return m_pixels[(y * m_width) + x]; }
     // byte* pixelPtrAt(int x, int y) { return &m_pixels[(y * m_width) + x]; }
-    const byte* const pixelPtrAt(int x, int y) const { return &m_pixels[(y * m_width) + x]; }
+    const byte* pixelPtrAt(int x, int y) const { return &m_pixels[(y * m_width) + x]; }
 
-    unsigned int width() const { return m_width; }
-    unsigned int height() const { return m_height; }
+    int width() const { return m_width; }
+    int height() const { return m_height; }
 
 private:
     byte* const m_pixels;
