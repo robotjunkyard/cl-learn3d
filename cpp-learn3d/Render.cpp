@@ -61,15 +61,65 @@ inline int modu(int x, int y)
     return x % y + (x % y < 0 ? y : 0);
 }
 
+// returns where sx1 (long) left off
+float Render::drawSubtriangleTextured(Canvas& canvas,
+                                     float start_sx0, float start_sx1,
+                                     float dsx0, // dupper, // dsx0
+                                     float dsx1, // dlong,  // dsx1
+                                     int yi_start,   // yi_start
+                                     int yi_end,     // std::min(midy, h),  // yi_end
+                                     const Bitmap& bitmap,
+                                     const Triangle2& screenTri,
+                                     const Triangle2& uvtri)
+{
+    const auto tex_w = bitmap.width(),
+               tex_h = bitmap.height(),
+               can_w = canvas.width(),
+               can_h = canvas.height(),
+               yiend = std::min(can_h, yi_end);
+    auto sx0 = start_sx0,
+         sx1 = start_sx1;
+
+    if (yi_start > can_h) return sx1;
+
+    // for each row...
+    for (int yi = yi_start; yi < yiend; yi++)
+    {
+        // and for each pixel in that row...
+        if (yi >= 0) // && yi < yiend)
+            for (int xi = std::min(static_cast<int>(sx0), static_cast<int>(sx1));
+                     xi < std::max(static_cast<int>(sx0), static_cast<int>(sx1));
+                     xi++)
+            {
+                if ((xi >= 0) && (xi < can_w))
+                {
+                    const Vec2 pixelvec = { static_cast<float>(xi), static_cast<float>(yi) };
+                    const Vec3 baryc = screenTri.barycentricCoordinates(pixelvec);
+                    const Vec2 cartuv = uvtri.pointFromBarycentric(baryc);
+
+                    const int src_uv_x = modu(static_cast<int>(tex_w * cartuv.x), tex_w),
+                              src_uv_y = modu(static_cast<int>(tex_h * cartuv.y), tex_h);
+
+                    const auto diffuse_color = bitmap.pixelAt(src_uv_x, src_uv_y);
+
+                    canvas.setPixel(xi, yi, diffuse_color);
+                }
+            }
+
+        sx0 += dsx0;
+        sx1 += dsx1;
+    }
+
+    return sx1;
+}
+
 void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh, unsigned short facenum,
                                       const Triangle2& uvtri,
                                       int x1, int y1, int x2, int y2, int x3, int y3)
 {
     // previous functions leading up to this one should have already
     // assured a bitmap exists
-    const Bitmap* const bitmap = mesh.getTexture();
-    const auto tex_w = bitmap->width(),
-                       tex_h = bitmap->height();
+    const Bitmap& bitmap = *mesh.getTexture();
     const Triangle2 screenTri = Triangle2(x1, y1, x2, y2, x3, y3);
     const int h = canvas.height();
 
@@ -97,86 +147,27 @@ void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh, unsigned
         return;
 
     const float dlong = static_cast<float>(x_btm_sub_top) / static_cast<float>(y_btm_sub_top);
-    float sx0 = static_cast<float>(topx),
-          sx1 = sx0;
+    float sx1 = static_cast<float>(topx);
 
-    if (0 == y_mid_sub_top)
-        goto draw_lower;
+    // draw upper subtriangle, if applicable
+    if (0 != y_mid_sub_top)
+        sx1 = drawSubtriangleTextured(canvas,
+                                          sx1, sx1,
+                                          static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top), // dsx0
+                                          dlong,  // dsx1
+                                          topy,   // yi_start
+                                          midy,   // std::min(midy, h),  // yi_end
+                                          bitmap, screenTri, uvtri);
 
-    /* must enclose this below section in brackets, else clang whines about 'goto' above */
-    {
-        const float dupper = static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top);
-        // TRIDBGMSG("UPPER:  dupper = %f\n", dupper);
-        //  --- draw upper sub-triangle ---
-
-        // for each row...
-        for (int yi = topy,
-                 yiend = std::min(midy, h);
-             yi < yiend;
-             yi++)
-        {
-            // and for each pixel in that row...
-            if (yi >= 0 && yi < midy)
-                for (int xi = std::min(sx0, sx1);  // static_cast<int>(std::max(0.0f, sx0));
-                         xi < std::max(sx0, sx1);  // std::min(static_cast<float>(canvas.width()), sx1);
-                         xi++)
-                {
-                    const Vec2 pixelvec = { static_cast<float>(xi), static_cast<float>(yi) };
-                    const Vec3 baryc = screenTri.barycentricCoordinates(pixelvec);
-                    const Vec2 cartuv = uvtri.pointFromBarycentric(baryc);
-
-                    const int src_uv_x = modu(static_cast<int>(tex_w * cartuv.x), tex_w),
-                              src_uv_y = modu(static_cast<int>(tex_h * cartuv.y), tex_h);
-
-                    const auto color = bitmap->pixelAt(src_uv_x, src_uv_y);
-                    canvas.setPixel(xi, yi, color);
-                }
-
-            sx0 += dupper;
-            sx1 += dlong;
-        }
-    }
-
-    // do same but to draw lower sub-triangle
-draw_lower:
-    if (0 == y_btm_sub_mid) {
-        // TRIDBGMSG("Tri OK(U)\n");
-        return; // no need to draw lower sub-triangle
-    }
-
-    const float dlower = static_cast<float>(x_btm_sub_mid) / static_cast<float>(y_btm_sub_mid);
-    // TRIDBGMSG("LOWER:  dlower = %f\n", dlower);
-    sx0 = static_cast<float>(midx);
-
-    // for each row...
-    for (int yi = midy,
-             yiend = std::min(btmy, h);
-             yi < yiend;
-             yi++) {
-        // and for each pixel in that row...
-        if (yi >= 0 && yi < btmy)
-        {
-            for (int xi = std::min(static_cast<int>(sx0), static_cast<int>(sx1));
-                     xi < std::max(static_cast<int>(sx0), static_cast<int>(sx1));
-                     xi++)
-            {
-                const Vec2 pixelvec = { static_cast<float>(xi), static_cast<float>(yi) };
-                const Vec3 baryc = screenTri.barycentricCoordinates(pixelvec);
-                const Vec2 cartuv = uvtri.pointFromBarycentric(baryc);
-
-                const int src_uv_x = modu(static_cast<int>(tex_w * cartuv.x), tex_w),
-                          src_uv_y = modu(static_cast<int>(tex_h * cartuv.y), tex_h);
-
-                const auto color = bitmap->pixelAt(src_uv_x, src_uv_y);
-                canvas.setPixel(xi, yi, color);
-            }
-        }
-
-        sx0 += dlower;
-        sx1 += dlong;
-    }
-
-    // TRIDBGMSG("Tri OK\n");
+    // draw lower subtriangle, if applicable
+    if (0 != y_btm_sub_mid)
+        drawSubtriangleTextured(canvas,
+                                    static_cast<float>(midx), sx1,
+                                    static_cast<float>(x_btm_sub_mid) / static_cast<float>(y_btm_sub_mid), // dsx0
+                                    dlong,  // dsx1
+                                    midy,   // yi_start
+                                    btmy,   // std::min(btmy, h),  // yi_end
+                                    bitmap, screenTri, uvtri);
 }
 
 
