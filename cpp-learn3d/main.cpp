@@ -140,8 +140,7 @@ int main(int argc, char* argv[])
         canvas.blitBitmap(*mesh.getTexture(), 4, 16);
         canvas.drawFlatTriangle(testTri, bary.allGTE(0.0f) ? 12 : 4);
         //Render::drawMeshFlat(canvas, camera, mesh);
-        for (int i = 0; i < 32; i++)
-            Render::drawMeshTextured(canvas, camera, mesh);
+        Render::drawMeshTextured(canvas, camera, mesh);
 
         canvas.blitBitmap(cursorpic, mcurpos.x, mcurpos.y);
 
