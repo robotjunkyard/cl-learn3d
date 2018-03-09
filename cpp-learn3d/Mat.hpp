@@ -24,26 +24,26 @@ struct Mat {
     {
     }
 
-    Mat(float m11, float m12, float m13, float m14,
-        float m21, float m22, float m23, float m24,
-        float m31, float m32, float m33, float m34,
-        float m41, float m42, float m43, float m44)
-        : m11(m11)
-        , m12(m12)
-        , m13(m13)
-        , m14(m14)
-        , m21(m21)
-        , m22(m22)
-        , m23(m23)
-        , m24(m24)
-        , m31(m31)
-        , m32(m32)
-        , m33(m33)
-        , m34(m34)
-        , m41(m41)
-        , m42(m42)
-        , m43(m43)
-        , m44(m44)
+    Mat(float M11, float M12, float M13, float M14,
+        float M21, float M22, float M23, float M24,
+        float M31, float M32, float M33, float M34,
+        float M41, float M42, float M43, float M44)
+        : m11(M11)
+        , m12(M12)
+        , m13(M13)
+        , m14(M14)
+        , m21(M21)
+        , m22(M22)
+        , m23(M23)
+        , m24(M24)
+        , m31(M31)
+        , m32(M32)
+        , m33(M33)
+        , m34(M34)
+        , m41(M41)
+        , m42(M42)
+        , m43(M43)
+        , m44(M44)
     {
     }
 
@@ -146,17 +146,17 @@ struct Mat {
         float x = (v.x * m11) + (v.y * m21) + (v.z * m31) + m41;
         float y = (v.x * m12) + (v.y * m22) + (v.z * m32) + m42;
         float z = (v.x * m13) + (v.y * m23) + (v.z * m33) + m43;
-        float w = (v.x * m14) + (v.y * m24) + (v.z * m34) + m44;
+        const float w = (v.x * m14) + (v.y * m24) + (v.z * m34) + m44;
 
         // Saw this fix in other texts that I didn't notice before.
         // Needed because multiplying M4*V3 can sometimes mess up the
         // coordinate-space of a vector, and this nudges it back into
         // whatever space it is supposed to be in.  Something about
         // homogenous vs. Cartesian something-something-or-rather.
-        if (w == 0.0)
-            return Vec3(0.0, 0.0, 0.0);
+        if (feq(w, 0.0f))
+            return Vec3(0.0f, 0.0f, 0.0f);
 
-        if (w != 1.0) {
+        if (!feq(w, 1.0f)) {
             x /= w;
             y /= w;
             z /= w;

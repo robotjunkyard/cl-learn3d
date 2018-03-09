@@ -15,7 +15,8 @@ struct SDL_Texture;
 struct color_t {
     byte r = 0, g = 0, b = 0, a = 255;
 
-    color_t() {}
+    color_t() = default;
+
     color_t(byte __r, byte __g, byte __b, byte __a)
         : r(__r)
         , g(__g)
@@ -24,11 +25,12 @@ struct color_t {
     {
     }
 
-    ~color_t() {}
+    ~color_t() = default;
 
     uint32_t as_uint32() const
     {
-        return *reinterpret_cast<uint32_t*>(const_cast<color_t*>(this));
+        // return *reinterpret_cast<uint32_t*>(const_cast<color_t*>(this));
+        return (a << 24) | (b << 16) | (g << 8) | r;
     }
 };
 
@@ -53,12 +55,12 @@ public:
         c.a = a;
     }
 
-    const color_t& getColor(int index) const
+    const color_t& getColor(size_t index) const
     {
         return _colors.at(index);
     }
 
-    uint32_t getColorUINT32(byte index) const
+    uint32_t getColorUINT32(size_t index) const
     {
         return (_colors[index].as_uint32());
     }
@@ -103,8 +105,7 @@ public:
             throw std::bad_alloc();
     }
 
-    ~Canvas()
-    {    }
+    ~Canvas() = default;
 
     void setPixel(int x, int y, byte color)
     {

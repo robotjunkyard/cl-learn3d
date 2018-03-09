@@ -122,7 +122,7 @@ public:
     //
     // This all said, there's probably a better way to go about this than having the draw-order-buffer
     // be a part of Mesh itself.  But that sort of re-org work comes much, much later...
-    void sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& camera) const;
+    void sortMeshTriangleDrawOrderFromCamera(/* const Mat& tmat, */ const Camera& camera) const;
 
 private:
     Mesh(const std::vector<Vec3>& vertexdata, const std::vector<mesh_face_t>& faceinfo)

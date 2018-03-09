@@ -23,7 +23,7 @@ Mesh Mesh::loadMesh(const std::string& meshname)
         throw std::runtime_error("file not found: " + filename);
 
     std::string line;
-    int vertn = 0, facen = 0, uvn = 0;
+    unsigned int vertn = 0, facen = 0, uvn = 0;
 
     while (std::getline(infile, line)) {
         std::vector<std::string> tokens;
@@ -103,11 +103,14 @@ Mesh Mesh::loadMesh(const std::string& meshname)
         }
     }
 
+    printf("loadMesh: loaded `%s` with %d faces, %d verts\n",
+        meshname.c_str(), facen, vertn);
+
     return Mesh(vertexdata, facedata, uvdata, faceuvdata, meshname);
 }
 
 // TODO: err, what was I going to do with tmat?
-void Mesh::sortMeshTriangleDrawOrderFromCamera(const Mat& tmat, const Camera& camera) const
+void Mesh::sortMeshTriangleDrawOrderFromCamera(/* const Mat& tmat, */ const Camera& camera) const
 {
     auto triSortValuator = [&](int facenum) -> float {
         const Vec3& eye = camera.getOrigin();

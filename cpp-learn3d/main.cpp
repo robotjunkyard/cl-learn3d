@@ -28,11 +28,6 @@ Palette make_db32_Palette();
 
 #undef main // fuck off, SDL
 
-int vtest(int i)
-{
-    return i;
-}
-
 int main(int argc, char* argv[])
 {
     const Bitmap cursorpic(16, 16, "cursor.data");
@@ -132,7 +127,7 @@ int main(int argc, char* argv[])
             camera.lookAt(Vec3(eyex, eyey, eyez),
                 Vec3(0.0f, 0.0f, h),
                 Vec3(0.0f, 0.0f, 1.0f));
-            camera.setPerspectiveProjection(7.0f, 0.1f, 10.0f);
+            camera.setPerspectiveProjection(30.0f, 0.1f, 10.0f);
         }
 
         // determine mouse cursor position in canvas
@@ -144,15 +139,15 @@ int main(int argc, char* argv[])
 
         canvas.blitBitmap(*mesh.getTexture(), 4, 16);
         canvas.drawFlatTriangle(testTri, bary.allGTE(0.0f) ? 12 : 4);
-        // Render::drawMeshFlat(canvas, camera, mesh);
-        Render::drawMeshTextured(canvas, camera, mesh);
+        //Render::drawMeshFlat(canvas, camera, mesh);
+        for (int i = 0; i < 32; i++)
+            Render::drawMeshTextured(canvas, camera, mesh);
 
         canvas.blitBitmap(cursorpic, mcurpos.x, mcurpos.y);
-        // printf("%f, %f, %f\n", bary.x, bary.y, bary.z);
 
         // present to user
         canvas.updateSDLTexture(texture); // present 8bit AxB --into--> 32bit NxM
-        SDL_RenderCopy(renderer, texture, NULL, NULL);
+        SDL_RenderCopy(renderer, texture, nullptr, nullptr);
         SDL_RenderPresent(renderer);
 
         const unsigned int ticksAfterRender = SDL_GetTicks();

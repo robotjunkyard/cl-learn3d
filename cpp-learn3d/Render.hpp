@@ -25,7 +25,7 @@ public:
                                         const Bitmap& bitmap,
                                         const Triangle2& screenTri,
                                         const Triangle2& uvtri);
-    static void drawMeshTriangleTextured (Canvas& canvas, const Mesh& mesh, unsigned short facenum,
+    static void drawMeshTriangleTextured (Canvas& canvas, const Mesh& mesh,
                                       const Triangle2& uvtri,
                                       int x1, int y1, int x2, int y2, int x3, int y3);
     static void drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera& camera,

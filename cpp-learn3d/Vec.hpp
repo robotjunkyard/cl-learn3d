@@ -20,19 +20,19 @@ public:
 
     ~Vec4() = default;
 
-    Vec4(float x, float y, float z)
-        : x(x)
-        , y(y)
-        , z(z)
+    Vec4(float X, float Y, float Z)
+        : x(X)
+        , y(Y)
+        , z(Z)
         , w(0.0f)
     {
     }
 
-    Vec4(float x, float y, float z, float w)
-        : x(x)
-        , y(y)
-        , z(z)
-        , w(w)
+    Vec4(float X, float Y, float Z, float W)
+        : x(X)
+        , y(Y)
+        , z(Z)
+        , w(W)
     {
     }
 
@@ -86,6 +86,11 @@ public:
         return Vec4(-x, -y, -z, -w);
     }
 
+    Vec4 operator-(const Vec4& other) const
+    {
+        return Vec4(x - other.x, y - other.y, z - other.z, w - other.w);
+    }
+
     Vec4& operator*=(const float c)
     {
         x *= c;
@@ -103,7 +108,7 @@ public:
     Vec4& normalize()
     {
         const float m = mag();
-        if (feq(m, 0.0f)) {
+        if (!feq(m, 0.0f)) {
             x /= m;
             y /= m;
             z /= m;
@@ -131,10 +136,10 @@ public:
 
     ~Vec3() = default;
 
-    Vec3(float x, float y, float z)
-        : x(x)
-        , y(y)
-        , z(z)
+    Vec3(float X, float Y, float Z)
+        : x(X)
+        , y(Y)
+        , z(Z)
     {
     }
 
@@ -202,6 +207,11 @@ public:
         return Vec3(-x, -y, -z);
     }
 
+    Vec3 operator-(const Vec3& other) const
+    {
+        return Vec3(x - other.x, y - other.y, z - other.z);
+    }
+
     Vec3& operator*=(const float c)
     {
         x *= c;
@@ -223,7 +233,7 @@ public:
     Vec3& normalize()
     {
         const float m = mag();
-        if (m != 0.0f) { // TODO: use epsilon-compare
+        if (!feq(m, 0.0f)) {
             x /= m;
             y /= m;
             z /= m;
@@ -265,9 +275,9 @@ public:
 
     ~Vec2() = default;
 
-    Vec2(float x, float y)
-        : x(x)
-        , y(y)
+    Vec2(float X, float Y)
+        : x(X)
+        , y(Y)
     {
     }
 
@@ -277,24 +287,9 @@ public:
     {
     }
 
-    static Vec2 zero()
-    {
-        return Vec2(0.0f, 0.0f);
-    }
-
     static float dot(const Vec2& a, const Vec2& b)
     {
         return (a.x * b.x) + (a.y * b.y);
-    }
-
-    static Vec2 zeroVec()
-    {
-        return { 0.0f, 0.0f };
-    }
-
-    bool isZero() const
-    {
-        return (x == 0.0f) && (y == 0.0f);
     }
 
     Vec2& operator=(const Vec2& other)
@@ -333,11 +328,21 @@ public:
         return Vec2(-x, -y);
     }
 
+    Vec2 operator-(const Vec2& other) const
+    {
+        return Vec2(x - other.x, y - other.y);
+    }
+
     Vec2& operator*=(const float c)
     {
         x *= c;
         y *= c;
         return *this;
+    }
+
+    Vec2 operator* (float c) const
+    {
+        return Vec2(x*c, y*c);
     }
 
     bool operator==(const Vec2& other) const
@@ -353,7 +358,7 @@ public:
     Vec2& normalize()
     {
         const float m = mag();
-        if (m != 0.0f) { // TODO: use epsilon-compare
+        if (!feq(m, 0.0f)) {
             x /= m;
             y /= m;
         }
@@ -390,36 +395,6 @@ public:
         float v;
     };
 };
-
-inline Vec4 operator+(const Vec4& a, const Vec4& b)
-{
-    return Vec4(a.x + b.x, a.y + b.y, a.z + b.z, a.w + b.w);
-}
-
-inline Vec4 operator-(const Vec4& a, const Vec4& b)
-{
-    return Vec4(a.x - b.x, a.y - b.y, a.z - b.z, a.w - b.w);
-}
-
-inline Vec3 operator+(const Vec3& a, const Vec3& b)
-{
-    return Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
-}
-
-inline Vec3 operator-(const Vec3& a, const Vec3& b)
-{
-    return Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
-
-inline Vec2 operator+(const Vec2& a, const Vec2& b)
-{
-    return Vec2(a.x + b.x, a.y + b.y);
-}
-
-inline Vec2 operator-(const Vec2& a, const Vec2& b)
-{
-    return Vec2(a.x - b.x, a.y - b.y);
-}
 
 // ====================================================================================
 // comparative vertex distance means it is not the LITERAL distance between

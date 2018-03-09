@@ -47,7 +47,7 @@ void Render::drawFlat3DTriangle(Canvas& canvas,
 void Render::drawMeshFlat(Canvas& canvas, const Camera& camera, const Mesh& mesh)
 {
     const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix();
-    mesh.sortMeshTriangleDrawOrderFromCamera(worldMatrix, camera);
+    mesh.sortMeshTriangleDrawOrderFromCamera(/* worldMatrix, */ camera);
 
     for (const auto faceNum : mesh.getFaceSortBuffer()) {
         const byte color = 2 + (faceNum % 30);
@@ -113,7 +113,7 @@ float Render::drawSubtriangleTextured(Canvas& canvas,
     return sx1;
 }
 
-void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh, unsigned short facenum,
+void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh,
                                       const Triangle2& uvtri,
                                       int x1, int y1, int x2, int y2, int x3, int y3)
 {
@@ -193,7 +193,7 @@ void Render::drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera
               h = canvas.height();
     const float cnear = camera.getNear();
 
-    const std::function<float(float)> rfunc = ceilf;
+    const std::function<float(float)> rfunc = rintf;
     const int sx1 = static_cast<int>(rfunc((w * 0.5f) + (tv1.x * w * 0.5f / std::max(tv1.z, cnear)))),
               sy1 = static_cast<int>(rfunc((h * 0.5f) + (tv1.y * h * 0.5f / std::max(tv1.z, cnear)))),
               sx2 = static_cast<int>(rfunc((w * 0.5f) + (tv2.x * w * 0.5f / std::max(tv2.z, cnear)))),
@@ -201,9 +201,7 @@ void Render::drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera
               sx3 = static_cast<int>(rfunc((w * 0.5f) + (tv3.x * w * 0.5f / std::max(tv3.z, cnear)))),
               sy3 = static_cast<int>(rfunc((h * 0.5f) + (tv3.y * h * 0.5f / std::max(tv3.z, cnear))));
 
-    //const bool isFacingCamera = (!((sx1 < 0) && (sx1 > w) && (sx2 < 0) && (sx2 > w) && (sx3 < 0) && (sx3 > w) && (sy1 < 0) && (sy1 > h) && (sy2 < 0) && (sy2 > h) && (sy3 < 0) && (sy3 > h)));
-    //if (isFacingCamera)
-    drawMeshTriangleTextured(canvas, mesh, facenum,
+    drawMeshTriangleTextured(canvas, mesh,
                              uvTri,
                              sx1, sy1, sx2, sy2, sx3, sy3);
 }
@@ -214,7 +212,7 @@ void Render::drawMeshTextured(Canvas& canvas, const Camera& camera, const Mesh& 
         drawMeshFlat(canvas, camera, mesh);
 
     const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix();
-    mesh.sortMeshTriangleDrawOrderFromCamera(worldMatrix, camera);
+    mesh.sortMeshTriangleDrawOrderFromCamera(/* worldMatrix, */ camera);
 
     for (const auto facenum : mesh.getFaceSortBuffer()) {
         // another less important but still necessary TODO: materials!

@@ -22,7 +22,7 @@ void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
         }
     }
 
-    SDL_UpdateTexture(sdlTexture, NULL, m_destPixels32.data(), m_width * sizeof(m_destPixels32[0])); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
+    SDL_UpdateTexture(sdlTexture, nullptr, m_destPixels32.data(), m_width * sizeof(m_destPixels32[0])); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
 }
 
 #ifdef BITMAP_HPP_INCLUDED
