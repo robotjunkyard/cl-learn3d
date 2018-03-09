@@ -12,15 +12,8 @@
 
 void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
 {
-    for (int y = 0; y < height(); y++) {
-        for (int x = 0; x < width(); x++) {
-            const unsigned int idx = (width() * y) + x;
-            const byte color8 = m_pixels[idx];
-            const uint32_t truecolor = m_palette.getColor(color8).as_uint32();
-
-            m_destPixels32[idx] = truecolor;
-        }
-    }
+    for (int i = 0; i < m_pixels.size(); i++)
+        m_destPixels32[i] = m_palette.getColor(m_pixels[i]).as_uint32();
 
     SDL_UpdateTexture(sdlTexture, nullptr, m_destPixels32.data(), m_width * sizeof(m_destPixels32[0])); // oh!  pitch is BYTES, not PIXELS!  so... "* 4" !
 }

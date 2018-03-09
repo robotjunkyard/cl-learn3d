@@ -55,12 +55,12 @@ public:
         c.a = a;
     }
 
-    const color_t& getColor(size_t index) const
+    const color_t& getColor(byte index) const
     {
         return _colors.at(index);
     }
 
-    uint32_t getColorUINT32(size_t index) const
+    uint32_t getColorUINT32(byte index) const
     {
         return (_colors[index].as_uint32());
     }
@@ -81,8 +81,6 @@ private:
     const std::array<color_t, 256> _initColors;
     std::array<color_t, 256> _colors;
 };
-
-class Canvas;
 
 /** Canvas is the game's internal representation of a virtual 8-bit display.
 	This is because SDL2 was giving me a bunch of shit about not allowing
