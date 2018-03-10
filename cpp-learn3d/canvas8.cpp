@@ -6,8 +6,8 @@
 /* db32 palette by Richard "DawnBringer" Fhager
  * Link: http://pixeljoint.com/forum/forum_posts.asp?TID=16247
  */
-const std::array<color_t, 256> raw_db32 = // comment to stop clang-format from putting first element here, goddamn it
-    { { { 255, 0, 255, 0 }, //!< Sprite blitter requires color #0 of sprite shall be "transparent", but the 0 alpha *here* is not actually used anywhere directly (just for mnemonics)
+const std::array<color_t, 256> raw_db32 = { // comment to stop clang-format from putting first element here, goddamn it
+    {   { 255, 0, 255, 0 }, //!< Sprite blitter requires color #0 of sprite shall be "transparent", but the 0 alpha *here* is not actually used anywhere directly (just for mnemonics)
         //!< Also, Magenta makes it easy to spot when a bug is going on -- if this ugly Magenta is seen, transparency isn't being honored somewhere. */
         { 0, 0, 0, 255 },
         { 34, 32, 52, 255 },
@@ -40,10 +40,11 @@ const std::array<color_t, 256> raw_db32 = // comment to stop clang-format from p
         { 217, 87, 99, 255 },
         { 215, 123, 186, 255 },
         { 143, 151, 74, 255 },
-        { 138, 111, 48, 255 } } };
+        { 138, 111, 48, 255 }
+    }
+};
 
-Palette make_db32_Palette()
-{
+Palette make_db32_Palette() {
     Palette pal(raw_db32);
 
     return pal;

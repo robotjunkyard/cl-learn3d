@@ -16,8 +16,8 @@ public:
     // constructor will assume projection matrix being that of a perspective-type,
     // and that can always be changed later
     Camera(int xres, int yres,
-        const Vec3& origin, const Vec3& target, const Vec3& up = Vec3(0.0f, 1.0f, 0.0f),
-        float fov = 120.0f, float near = 0.5f, float far = 100.0f)
+           const Vec3& origin, const Vec3& target, const Vec3& up = Vec3(0.0f, 1.0f, 0.0f),
+           float fov = 120.0f, float near = 0.5f, float far = 100.0f)
         : m_viewMatrix()
         , m_projMatrix()
         , m_origin(origin)
@@ -27,14 +27,12 @@ public:
         , m_near(near)
         , m_far(far)
         , m_xres(xres)
-        , m_yres(yres)
-    {
+        , m_yres(yres) {
         lookAt(m_origin, m_target, m_up);
         setPerspectiveProjection(fov, near, far);
     }
 
-    const Mat& setPerspectiveProjection(float fov, float near, float far)
-    {
+    const Mat& setPerspectiveProjection(float fov, float near, float far) {
         const float aspectratio = (float)m_xres / (float)m_yres;
         const float s = tan((fov / 2.0f) * (pi / 180.0f)); // remember pi * 180 converts (fov/2)° to radians
         const float j = -far / (far - near);
@@ -42,9 +40,9 @@ public:
 
         m_projMatrix
             = Mat(1.0f / (s * aspectratio), 0.0f, 0.0f, 0.0f,
-                0.0f, 1.0f / s, 0.0f, 0.0f,
-                0.0f, 0.0f, j, 1.0,
-                0.0f, 0.0f, jj, 0.0f);
+                  0.0f, 1.0f / s, 0.0f, 0.0f,
+                  0.0f, 0.0f, j, 1.0,
+                  0.0f, 0.0f, jj, 0.0f);
         m_fov = fov;
         m_near = near;
         m_far = far;
@@ -52,43 +50,35 @@ public:
         return m_projMatrix;
     }
 
-    const Mat& getViewMatrix() const
-    {
+    const Mat& getViewMatrix() const {
         return m_viewMatrix;
     }
 
-    const Mat& getProjMatrix() const
-    {
+    const Mat& getProjMatrix() const {
         return m_projMatrix;
     }
 
-    const Vec3& getOrigin() const
-    {
+    const Vec3& getOrigin() const {
         return m_origin;
     }
 
-    const Vec3& getTarget() const
-    {
+    const Vec3& getTarget() const {
         return m_target;
     }
 
-    const Vec3& getUp() const
-    {
+    const Vec3& getUp() const {
         return m_up;
     }
 
-    float getNear() const
-    {
+    float getNear() const {
         return m_near;
     }
 
-    float getFar() const
-    {
+    float getFar() const {
         return m_far;
     }
 
-    float getFOV() const
-    {
+    float getFOV() const {
         return m_fov;
     }
 };

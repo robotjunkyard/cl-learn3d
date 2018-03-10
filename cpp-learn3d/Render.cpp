@@ -2,20 +2,18 @@
 #include "PredicateQuicksort.hpp"
 #include "Quat.hpp"
 
-Vec3 calculateTriNormal(const Vec3& v1, const Vec3& v2, const Vec3& v3)
-{
+Vec3 calculateTriNormal(const Vec3& v1, const Vec3& v2, const Vec3& v3) {
     const Vec3 a = v2 - v1,
                b = v3 - v1;
     return Vec3::cross(a, b);
 }
 
 void Render::drawFlat3DTriangle(Canvas& canvas,
-    const Camera& camera,
-    byte color,
-    const Vec3& v1, const Vec3& v2, const Vec3& v3, // world-space vertices
-    const Mat& tmat, // matrix to transform vertices from world->clipping
-    bool cullBackfaces = true)
-{
+                                const Camera& camera,
+                                byte color,
+                                const Vec3& v1, const Vec3& v2, const Vec3& v3, // world-space vertices
+                                const Mat& tmat, // matrix to transform vertices from world->clipping
+                                bool cullBackfaces = true) {
     // Perf TODO: probably better to do this in one clustered batch for all world geometry
     // to a buffer full of screen-space triangles, and then actually draw from that buffer
     const Vec3 tv1 = tmat * v1,
@@ -44,8 +42,7 @@ void Render::drawFlat3DTriangle(Canvas& canvas,
 
 //! draws a mesh, flat-shaded (does not yet honor or support .obj materials,
 //! so colors are arbitrary "debug" style appearance)
-void Render::drawMeshFlat(Canvas& canvas, const Camera& camera, const Mesh& mesh)
-{
+void Render::drawMeshFlat(Canvas& canvas, const Camera& camera, const Mesh& mesh) {
     const Mat worldMatrix = camera.getProjMatrix() * camera.getViewMatrix();
     mesh.sortMeshTriangleDrawOrderFromCamera(/* worldMatrix, */ camera);
 
@@ -56,22 +53,20 @@ void Render::drawMeshFlat(Canvas& canvas, const Camera& camera, const Mesh& mesh
     }
 }
 
-inline int modu(int x, int y)
-{
+inline int modu(int x, int y) {
     return x % y + (x % y < 0 ? y : 0);
 }
 
 // returns where sx1 (long) left off
 float Render::drawSubtriangleTextured(Canvas& canvas,
-                                     float start_sx0, float start_sx1,
-                                     float dsx0, // dupper, // dsx0
-                                     float dsx1, // dlong,  // dsx1
-                                     int yi_start,   // yi_start
-                                     int yi_end,     // std::min(midy, h),  // yi_end
-                                     const Bitmap& bitmap,
-                                     const Triangle2& screenTri,
-                                     const Triangle2& uvtri)
-{
+                                      float start_sx0, float start_sx1,
+                                      float dsx0, // dupper, // dsx0
+                                      float dsx1, // dlong,  // dsx1
+                                      int yi_start,   // yi_start
+                                      int yi_end,     // std::min(midy, h),  // yi_end
+                                      const Bitmap& bitmap,
+                                      const Triangle2& screenTri,
+                                      const Triangle2& uvtri) {
     const auto tex_w = bitmap.width(),
                tex_h = bitmap.height(),
                can_w = canvas.width(),
@@ -83,16 +78,13 @@ float Render::drawSubtriangleTextured(Canvas& canvas,
     if (yi_start > can_h) return sx1;
 
     // for each row...
-    for (int yi = yi_start; yi < yiend; yi++)
-    {
+    for (int yi = yi_start; yi < yiend; yi++) {
         // and for each pixel in that row...
         if (yi >= 0) // && yi < yiend)
             for (int xi = std::min(static_cast<int>(sx0), static_cast<int>(sx1));
-                     xi < std::max(static_cast<int>(sx0), static_cast<int>(sx1));
-                     xi++)
-            {
-                if ((xi >= 0) && (xi < can_w))
-                {
+                    xi < std::max(static_cast<int>(sx0), static_cast<int>(sx1));
+                    xi++) {
+                if ((xi >= 0) && (xi < can_w)) {
                     const Vec2 pixelvec = { static_cast<float>(xi), static_cast<float>(yi) };
                     const Vec3 baryc = screenTri.barycentricCoordinates(pixelvec);
                     const Vec2 cartuv = uvtri.pointFromBarycentric(baryc);
@@ -115,8 +107,7 @@ float Render::drawSubtriangleTextured(Canvas& canvas,
 
 void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh,
                                       const Triangle2& uvtri,
-                                      int x1, int y1, int x2, int y2, int x3, int y3)
-{
+                                      int x1, int y1, int x2, int y2, int x3, int y3) {
     // previous functions leading up to this one should have already
     // assured a bitmap exists
     const Bitmap& bitmap = *mesh.getTexture();
@@ -152,30 +143,29 @@ void Render::drawMeshTriangleTextured(Canvas& canvas, const Mesh& mesh,
     // draw upper subtriangle, if applicable
     if (0 != y_mid_sub_top)
         sx1 = drawSubtriangleTextured(canvas,
-                                          sx1, sx1,
-                                          static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top), // dsx0
-                                          dlong,  // dsx1
-                                          topy,   // yi_start
-                                          midy,   // std::min(midy, h),  // yi_end
-                                          bitmap, screenTri, uvtri);
+                                      sx1, sx1,
+                                      static_cast<float>(x_mid_sub_top) / static_cast<float>(y_mid_sub_top), // dsx0
+                                      dlong,  // dsx1
+                                      topy,   // yi_start
+                                      midy,   // std::min(midy, h),  // yi_end
+                                      bitmap, screenTri, uvtri);
 
     // draw lower subtriangle, if applicable
     if (0 != y_btm_sub_mid)
         drawSubtriangleTextured(canvas,
-                                    static_cast<float>(midx), sx1,
-                                    static_cast<float>(x_btm_sub_mid) / static_cast<float>(y_btm_sub_mid), // dsx0
-                                    dlong,  // dsx1
-                                    midy,   // yi_start
-                                    btmy,   // std::min(btmy, h),  // yi_end
-                                    bitmap, screenTri, uvtri);
+                                static_cast<float>(midx), sx1,
+                                static_cast<float>(x_btm_sub_mid) / static_cast<float>(y_btm_sub_mid), // dsx0
+                                dlong,  // dsx1
+                                midy,   // yi_start
+                                btmy,   // std::min(btmy, h),  // yi_end
+                                bitmap, screenTri, uvtri);
 }
 
 
 void Render::drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera& camera,
                                   const Mat& tmat, unsigned short facenum,
                                   const Triangle3& faceTri, const Triangle2& uvTri,
-                                  bool cullBackfaces)
-{
+                                  bool cullBackfaces) {
     if (facenum > mesh.getFaces().size())
         return;
 
@@ -206,8 +196,7 @@ void Render::drawTexturedMeshFace(Canvas& canvas, const Mesh& mesh, const Camera
                              sx1, sy1, sx2, sy2, sx3, sy3);
 }
 
-void Render::drawMeshTextured(Canvas& canvas, const Camera& camera, const Mesh& mesh)
-{
+void Render::drawMeshTextured(Canvas& canvas, const Camera& camera, const Mesh& mesh) {
     if (!mesh.getTexture())
         drawMeshFlat(canvas, camera, mesh);
 

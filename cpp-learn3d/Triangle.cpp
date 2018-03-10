@@ -1,7 +1,6 @@
 #include "Triangle.hpp"
 
-Vec3 Triangle2::barycentricCoordinates(const Vec2& point) const
-{
+Vec3 Triangle2::barycentricCoordinates(const Vec2& point) const {
     const Vec2 v0 = b - a,
                v1 = c - a,
                v2 = point - a;
@@ -15,8 +14,7 @@ Vec3 Triangle2::barycentricCoordinates(const Vec2& point) const
     return Vec3(ba, bb, bc);
 }
 
-Vec2 Triangle2::pointFromBarycentric(const Vec3& barycoord) const
-{
+Vec2 Triangle2::pointFromBarycentric(const Vec3& barycoord) const {
     const float u = barycoord.x,
                 v = barycoord.y,
                 w = barycoord.z;

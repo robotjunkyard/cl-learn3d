@@ -17,8 +17,7 @@ public:
     Bitmap(int width, int height, const std::string& filename, const std::string& directory = "gfx")
         : m_pixels(new byte[width * height])
         , m_width(width)
-        , m_height(height)
-    {
+        , m_height(height) {
         if (nullptr == m_pixels)
             throw "Failed to allocate pixels.";
 
@@ -43,8 +42,7 @@ public:
     Bitmap(int width, int height)
         : m_pixels(new byte[width * height])
         , m_width(width)
-        , m_height(height)
-    {
+        , m_height(height) {
         if (nullptr == m_pixels)
             throw "Failed to allocate pixels.";
 
@@ -55,8 +53,7 @@ public:
     Bitmap(int width, int height, byte* const memloc, bool copyPixels = false)
         : m_pixels((copyPixels) ? new byte[width * height] : memloc)
         , m_width(width)
-        , m_height(height)
-    {
+        , m_height(height) {
         // printf("initializing Bitmap: [%p --> %p]\n", memloc, _pixels);
         if (m_pixels && copyPixels) {
             //			printf("copying from memloc %p into new memloc %p\n", memloc);
@@ -67,21 +64,28 @@ public:
     }
 
     Bitmap(const Bitmap& other)
-        : Bitmap(other.m_width, other.m_height, other.m_pixels, true)
-    { }
+        : Bitmap(other.m_width, other.m_height, other.m_pixels, true) {
+    }
 
-    ~Bitmap()
-    {
+    ~Bitmap() {
         if (m_pixels && m_werePixelsCopied) // only delete if ctor alloc'd, duh
             delete[] m_pixels;
     }
 
-    byte pixelAt(int x, int y) const { return m_pixels[(y * m_width) + x]; }
+    byte pixelAt(int x, int y) const {
+        return m_pixels[(y * m_width) + x];
+    }
     // byte* pixelPtrAt(int x, int y) { return &m_pixels[(y * m_width) + x]; }
-    const byte* pixelPtrAt(int x, int y) const { return &m_pixels[(y * m_width) + x]; }
+    const byte* pixelPtrAt(int x, int y) const {
+        return &m_pixels[(y * m_width) + x];
+    }
 
-    int width() const { return m_width; }
-    int height() const { return m_height; }
+    int width() const {
+        return m_width;
+    }
+    int height() const {
+        return m_height;
+    }
 
 private:
     byte* const m_pixels;

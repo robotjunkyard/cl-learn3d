@@ -6,11 +6,10 @@
 // AET = Array Element Type
 // VRT = Valuator Return Type
 template <typename AET,
-    typename VRT>
+          typename VRT>
 int pqsPartition(std::vector<AET>& array,
-    unsigned int p, unsigned int r,
-    const std::function<VRT(AET)>& valuator)
-{
+                 unsigned int p, unsigned int r,
+                 const std::function<VRT(AET)>& valuator) {
     int i = p - 1,
         j = r + 1;
     const VRT x = valuator(array[p]);
@@ -33,11 +32,10 @@ int pqsPartition(std::vector<AET>& array,
 
 /* destructively-sorts the array */
 template <typename AET,
-    typename VRT>
+          typename VRT>
 std::vector<AET>& pQuicksort(std::vector<AET>& array,
-    unsigned int lo, unsigned int hi,
-    const std::function<VRT(AET)>& valuator)
-{
+                             unsigned int lo, unsigned int hi,
+                             const std::function<VRT(AET)>& valuator) {
     if (lo < hi) {
         const int p = pqsPartition<AET, VRT>(array, lo, hi, valuator);
         pQuicksort<AET, VRT>(array, lo, p, valuator);

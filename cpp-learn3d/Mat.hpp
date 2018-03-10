@@ -20,8 +20,7 @@ struct Mat {
         , m41(0.0f)
         , m42(0.0f)
         , m43(0.0f)
-        , m44(1.0f)
-    {
+        , m44(1.0f) {
     }
 
     Mat(float M11, float M12, float M13, float M14,
@@ -43,8 +42,7 @@ struct Mat {
         , m41(M41)
         , m42(M42)
         , m43(M43)
-        , m44(M44)
-    {
+        , m44(M44) {
     }
 
     Mat(const Mat& other)
@@ -63,12 +61,10 @@ struct Mat {
         , m41(other.m41)
         , m42(other.m42)
         , m43(other.m43)
-        , m44(other.m44)
-    {
+        , m44(other.m44) {
     }
 
-    Mat& operator=(const Mat& other)
-    {
+    Mat& operator=(const Mat& other) {
         m11 = other.m11;
         m12 = other.m12;
         m13 = other.m13;
@@ -89,17 +85,15 @@ struct Mat {
         return *this;
     }
 
-    Mat transposed() const
-    {
+    Mat transposed() const {
         return Mat(m11, m21, m31, m41,
-            m12, m22, m32, m42,
-            m13, m23, m33, m43,
-            m14, m24, m34, m44);
+                   m12, m22, m32, m42,
+                   m13, m23, m33, m43,
+                   m14, m24, m34, m44);
     }
 
     // TODO: Not yet formally tested
-    float det(void) const
-    {
+    float det(void) const {
         const float m11m22m33m44 = m11 * m22 * m33 * m44;
         const float m11m22m34m43 = m11 * m22 * m34 * m43;
         const float m11m23m34m42 = m11 * m23 * m34 * m42;
@@ -126,23 +120,21 @@ struct Mat {
         const float m14m23m32m41 = m14 * m23 * m32 * m41;
 
         return m11m22m33m44 - m11m22m34m43 + m11m23m34m42 - m11m23m32m44
-            + m11m24m32m43 - m11m24m33m42 - m12m23m34m41 + m12m23m31m44
-            - m12m24m31m43 + m12m24m33m41 - m12m21m33m44 + m12m21m34m43
-            + m13m24m31m42 - m13m24m32m41 + m13m21m32m44 - m13m21m34m42
-            + m13m22m34m41 - m13m22m31m44 - m14m21m32m43 + m14m21m33m42
-            - m14m22m33m41 + m14m22m31m43 - m14m23m31m42 + m14m23m32m41;
+               + m11m24m32m43 - m11m24m33m42 - m12m23m34m41 + m12m23m31m44
+               - m12m24m31m43 + m12m24m33m41 - m12m21m33m44 + m12m21m34m43
+               + m13m24m31m42 - m13m24m32m41 + m13m21m32m44 - m13m21m34m42
+               + m13m22m34m41 - m13m22m31m44 - m14m21m32m43 + m14m21m33m42
+               - m14m22m33m41 + m14m22m31m43 - m14m23m31m42 + m14m23m32m41;
     }
 
-    Vec4 operator*(const Vec4& v) const
-    {
+    Vec4 operator*(const Vec4& v) const {
         return Vec4(m11 * v.x + m21 * v.y + m31 * v.z + m41 * v.w,
-            m12 * v.x + m22 * v.y + m32 * v.z + m42 * v.w,
-            m13 * v.x + m23 * v.y + m33 * v.z + m43 * v.w,
-            m14 * v.x + m24 * v.y + m34 * v.z + m44 * v.w);
+                    m12 * v.x + m22 * v.y + m32 * v.z + m42 * v.w,
+                    m13 * v.x + m23 * v.y + m33 * v.z + m43 * v.w,
+                    m14 * v.x + m24 * v.y + m34 * v.z + m44 * v.w);
     }
 
-    Vec3 operator*(const Vec3& v) const
-    {
+    Vec3 operator*(const Vec3& v) const {
         float x = (v.x * m11) + (v.y * m21) + (v.z * m31) + m41;
         float y = (v.x * m12) + (v.y * m22) + (v.z * m32) + m42;
         float z = (v.x * m13) + (v.y * m23) + (v.z * m33) + m43;
@@ -165,24 +157,21 @@ struct Mat {
         return Vec3(x, y, z);
     }
 
-    static Mat identity()
-    {
+    static Mat identity() {
         return Mat(1.0, 0.0, 0.0, 0.0,
-            0.0, 1.0, 0.0, 0.0,
-            0.0, 0.0, 1.0, 0.0,
-            0.0, 0.0, 0.0, 1.0);
+                   0.0, 1.0, 0.0, 0.0,
+                   0.0, 0.0, 1.0, 0.0,
+                   0.0, 0.0, 0.0, 1.0);
     }
 
-    static Mat zero()
-    {
+    static Mat zero() {
         return Mat(0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0);
+                   0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0,
+                   0.0, 0.0, 0.0, 0.0);
     }
 
-    static Mat rotationMatrix(float angle, float ux, float uy, float uz)
-    {
+    static Mat rotationMatrix(float angle, float ux, float uy, float uz) {
         const float a = angle * (pi / 180.0f),
                     c = cos(a),
                     s = sin(a),
@@ -198,34 +187,31 @@ struct Mat {
                     m33 = (uz * uz * omcosa) + c;
 
         return Mat(m11, m12, m13, 0.0f,
-            m21, m22, m23, 0.0f,
-            m31, m32, m33, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f);
+                   m21, m22, m23, 0.0f,
+                   m31, m32, m33, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
     }
 
-    static Mat scaleMatrix(float x, float y, float z)
-    {
+    static Mat scaleMatrix(float x, float y, float z) {
         return Mat(x, 0.0f, 0.0f, 0.0f,
-            0.0f, y, 0.0f, 0.0f,
-            0.0f, 0.0f, z, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f);
+                   0.0f, y, 0.0f, 0.0f,
+                   0.0f, 0.0f, z, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
     }
 
-    static Mat scaleMatrix(float scalar)
-    {
+    static Mat scaleMatrix(float scalar) {
         return scaleMatrix(scalar, scalar, scalar);
     }
 
     void print() const;
 
     float m11, m12, m13, m14,
-        m21, m22, m23, m24,
-        m31, m32, m33, m34,
-        m41, m42, m43, m44;
+          m21, m22, m23, m24,
+          m31, m32, m33, m34,
+          m41, m42, m43, m44;
 };
 
-inline Mat operator*(const Mat& b, const Mat& a)
-{
+inline Mat operator*(const Mat& b, const Mat& a) {
     const float m11 = (a.m11 * b.m11) + (a.m12 * b.m21) + (a.m13 * b.m31) + (a.m14 * b.m41);
     const float m12 = (a.m11 * b.m12) + (a.m12 * b.m22) + (a.m13 * b.m32) + (a.m14 * b.m42);
     const float m13 = (a.m11 * b.m13) + (a.m12 * b.m23) + (a.m13 * b.m33) + (a.m14 * b.m43);
@@ -244,23 +230,21 @@ inline Mat operator*(const Mat& b, const Mat& a)
     const float m44 = (a.m41 * b.m14) + (a.m42 * b.m24) + (a.m43 * b.m34) + (a.m44 * b.m44);
 
     return Mat(m11, m12, m13, m14,
-        m21, m22, m23, m24,
-        m31, m32, m33, m34,
-        m41, m42, m43, m44);
+               m21, m22, m23, m24,
+               m31, m32, m33, m34,
+               m41, m42, m43, m44);
 }
 
-inline Mat operator+(const Mat& a, const Mat& b)
-{
+inline Mat operator+(const Mat& a, const Mat& b) {
     return Mat(a.m11 + b.m11, a.m12 + b.m12, a.m13 + b.m13, a.m14 + b.m14,
-        a.m21 + b.m21, a.m22 + b.m22, a.m23 + b.m23, a.m24 + b.m24,
-        a.m31 + b.m31, a.m32 + b.m32, a.m33 + b.m33, a.m34 + b.m34,
-        a.m41 + b.m41, a.m42 + b.m42, a.m43 + b.m43, a.m44 + b.m44);
+               a.m21 + b.m21, a.m22 + b.m22, a.m23 + b.m23, a.m24 + b.m24,
+               a.m31 + b.m31, a.m32 + b.m32, a.m33 + b.m33, a.m34 + b.m34,
+               a.m41 + b.m41, a.m42 + b.m42, a.m43 + b.m43, a.m44 + b.m44);
 }
 
-inline Mat operator-(const Mat& a, const Mat& b)
-{
+inline Mat operator-(const Mat& a, const Mat& b) {
     return Mat(a.m11 - b.m11, a.m12 - b.m12, a.m13 - b.m13, a.m14 - b.m14,
-        a.m21 - b.m21, a.m22 - b.m22, a.m23 - b.m23, a.m24 - b.m24,
-        a.m31 - b.m31, a.m32 - b.m32, a.m33 - b.m33, a.m34 - b.m34,
-        a.m41 - b.m41, a.m42 - b.m42, a.m43 - b.m43, a.m44 - b.m44);
+               a.m21 - b.m21, a.m22 - b.m22, a.m23 - b.m23, a.m24 - b.m24,
+               a.m31 - b.m31, a.m32 - b.m32, a.m33 - b.m33, a.m34 - b.m34,
+               a.m41 - b.m41, a.m42 - b.m42, a.m43 - b.m43, a.m44 - b.m44);
 }

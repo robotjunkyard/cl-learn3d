@@ -10,8 +10,7 @@
 #define TRIDBGMSG(...)
 #endif
 
-void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
-{
+void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const {
     for (int i = 0; i < m_pixels.size(); i++)
         m_destPixels32[i] = m_palette.getColor(m_pixels[i]).as_uint32();
 
@@ -19,8 +18,7 @@ void Canvas::updateSDLTexture(SDL_Texture* sdlTexture) const
 }
 
 #ifdef BITMAP_HPP_INCLUDED
-void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
-{
+void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty) {
     // figure out clipping
     const int canvW = width(),
               canvH = height(),
@@ -35,10 +33,10 @@ void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
               endSpriteClippedX = std::min<int>(canvW, endSpriteCanvasX),
               endSpriteClippedY = std::min<int>(canvH, endSpriteCanvasY),
               bdx = std::max<int>(destx, 0), // beginning X offset of dest canvas
-        bdy = std::max<int>(desty, 0), // beginning Y offset of dest canvas
-        axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
-        ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
-        s_across_x = endSpriteClippedX - topSpriteClippedX,
+              bdy = std::max<int>(desty, 0), // beginning Y offset of dest canvas
+              axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
+              ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
+              s_across_x = endSpriteClippedX - topSpriteClippedX,
               s_across_y = endSpriteClippedY - topSpriteClippedY;
 
     for (int y = 0; y < s_across_y; y++) {
@@ -58,8 +56,7 @@ void Canvas::blitBitmapMasked(const Bitmap& bitmap, int destx, int desty)
     }
 }
 
-void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty)
-{
+void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty) {
     // figure out clipping
     const int canvW = width(),
               canvH = height(),
@@ -74,10 +71,10 @@ void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty)
               endSpriteClippedY = std::min<int>(canvH, endSpriteCanvasY);
 
     const int bdx = std::max<int>(destx, 0), // beginning X offset of dest canvas
-        bdy = std::max<int>(desty, 0), // beginning Y offset of dest canvas
-        axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
-        ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
-        s_across_x = endSpriteClippedX - topSpriteClippedX, s_across_y = endSpriteClippedY - topSpriteClippedY;
+              bdy = std::max<int>(desty, 0), // beginning Y offset of dest canvas
+              axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
+              ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
+              s_across_x = endSpriteClippedX - topSpriteClippedX, s_across_y = endSpriteClippedY - topSpriteClippedY;
 
     if (s_across_x <= 0) {
         return;
@@ -97,8 +94,7 @@ void Canvas::blitBitmapNonmasked(const Bitmap& bitmap, int destx, int desty)
 }
 #endif // BITMAP_HPP_INCLUDED
 
-void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
-{
+void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color) {
     const int lx = std::min(x1, x2),
               ux = std::max(x1, x2),
               ly = std::min(y1, y2),
@@ -119,10 +115,10 @@ void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
               endSpriteClippedY = std::min<int>(canvH, endSpriteCanvasY);
 
     const int bdx = std::max<int>(lx, 0), // beginning X offset of dest canvas
-        bdy = std::max<int>(ly, 0), // beginning Y offset of dest canvas
-        // axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
-        // ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
-        s_across_x = endSpriteClippedX - topSpriteClippedX, s_across_y = endSpriteClippedY - topSpriteClippedY;
+              bdy = std::max<int>(ly, 0), // beginning Y offset of dest canvas
+              // axB = topSpriteClippedX - topSpriteCanvasX, // beginning X offset of source bitmap
+              // ayB = topSpriteClippedY - topSpriteCanvasY, // beginning Y offset of source bitmap
+              s_across_x = endSpriteClippedX - topSpriteClippedX, s_across_y = endSpriteClippedY - topSpriteClippedY;
 
     if (s_across_x <= 0) {
         return;
@@ -137,8 +133,7 @@ void Canvas::drawRect(int x1, int y1, int x2, int y2, byte color)
     }
 }
 
-void Canvas::drawHorizLine(int x1, int y, int x2, byte color)
-{
+void Canvas::drawHorizLine(int x1, int y, int x2, byte color) {
     TRIDBGMSG("  drawHLine(%d to %d on %d) : ", x1, x2, y);
     if ((y < 0) || (y >= height())) {
         TRIDBGMSG("FAIL\n");
@@ -158,8 +153,7 @@ void Canvas::drawHorizLine(int x1, int y, int x2, byte color)
     TRIDBGMSG("OK\n");
 }
 
-void Canvas::drawFlatTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color)
-{
+void Canvas::drawFlatTriangle(int x1, int y1, int x2, int y2, int x3, int y3, byte color) {
     int topx = x1, topy = y1,
         midx = x2, midy = y2,
         btmx = x3, btmy = y3;
@@ -224,13 +218,11 @@ draw_lower:
 }
 
 //! Find an indexed color closest to the specified arbitrary one, returning the index
-std::pair<const color_t&, byte> Palette::findApproximateColor(color_t color) const
-{
+std::pair<const color_t&, byte> Palette::findApproximateColor(color_t color) const {
     int mindiff = std::numeric_limits<int>::max();
     int idx = 0;  // what ultimately gets returned
 
-    for (byte i = 0; i < _colors.size(); i++)
-    {
+    for (byte i = 0; i < _colors.size(); i++) {
         const color_t& icolor = getColor(i);
         const int diff = std::abs(icolor.r - color.r) +
                          std::abs(icolor.g - color.g) +
@@ -238,8 +230,7 @@ std::pair<const color_t&, byte> Palette::findApproximateColor(color_t color) con
         if (0 == diff)
             return { icolor, idx };
 
-        if (diff < mindiff)
-        {
+        if (diff < mindiff) {
             mindiff = diff;
             idx = i;
         }
