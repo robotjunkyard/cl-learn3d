@@ -14,9 +14,9 @@
 #include "PredicateQuicksort.hpp"
 #include "Quat.hpp"
 #include "Render.hpp"
+#include "Triangle.hpp"
 #include "UI.hpp"
 #include "canvas8.hpp"
-#include "Triangle.hpp"
 #include <cstdio>
 #include <vector>
 
@@ -28,17 +28,18 @@ Palette make_db32_Palette();
 
 #undef main // fuck off, SDL
 
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     const Bitmap cursorpic(16, 16, "cursor.data");
     Camera camera(CANVAS_WIDTH, CANVAS_HEIGHT,
-                  Vec3(3.0f, 1.0f, 0.0f),
-                  Vec3(0.0f, 0.0f, 1.0f),
-                  Vec3(0.0f, 0.0f, 0.0f),
-                  90.0f,
-                  1.0f, // near
-                  80.0f); // far
+        Vec3(3.0f, 1.0f, 0.0f),
+        Vec3(0.0f, 0.0f, 1.0f),
+        Vec3(0.0f, 0.0f, 0.0f),
+        90.0f,
+        1.0f, // near
+        80.0f); // far
 
-    Triangle2 testTri { {16, 64}, {CANVAS_WIDTH/2,CANVAS_HEIGHT - 64}, {384, 8} };
+    Triangle2 testTri{ { 16, 64 }, { CANVAS_WIDTH / 2, CANVAS_HEIGHT - 64 }, { 384, 8 } };
 
     std::string meshname = "";
     if (argc == 2)
@@ -59,12 +60,11 @@ int main(int argc, char* argv[]) {
               windowHeight = CANVAS_HEIGHT * canvasToWindowScale;
 
     SDL_Window* const window = SDL_CreateWindow("cpp-learn3d",
-                               SDL_WINDOWPOS_UNDEFINED,
-                               SDL_WINDOWPOS_UNDEFINED,
-                               windowWidth,
-                               windowHeight,
-                               SDL_WINDOW_SHOWN //| SDL_WINDOW_FULLSCREEN_DESKTOP
-                                               );
+        SDL_WINDOWPOS_UNDEFINED,
+        SDL_WINDOWPOS_UNDEFINED,
+        windowWidth,
+        windowHeight,
+        SDL_WINDOW_SHOWN | SDL_WINDOW_FULLSCREEN_DESKTOP);
 
     SDL_Renderer* const renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     SDL_RendererInfo info;
@@ -77,10 +77,10 @@ int main(int argc, char* argv[]) {
     }
 
     SDL_Texture* const texture = SDL_CreateTexture(renderer,
-                                 SDL_PIXELFORMAT_ARGB8888,
-                                 SDL_TEXTUREACCESS_STREAMING,
-                                 CANVAS_WIDTH,
-                                 CANVAS_HEIGHT);
+        SDL_PIXELFORMAT_ARGB8888,
+        SDL_TEXTUREACCESS_STREAMING,
+        CANVAS_WIDTH,
+        CANVAS_HEIGHT);
 
     SDL_Event event;
     bool running = true;
@@ -118,21 +118,21 @@ int main(int argc, char* argv[]) {
             static float eyedelta = 0.0f;
             eyedelta += 0.01f;
 
-            const float h = 0.5f+(0.2f*sin(eyedelta/4.0f));
+            const float h = 0.5f + (0.2f * sin(eyedelta / 4.0f));
             const float eyex = 24 * sin(eyedelta),
                         eyey = 24 * cos(eyedelta),
                         eyez = 16.0f + h;
 
             camera.lookAt(Vec3(eyex, eyey, eyez),
-                          Vec3(0.0f, 0.0f, h),
-                          Vec3(0.0f, 0.0f, 1.0f));
-            camera.setPerspectiveProjection(30.0f, 0.1f, 10.0f);
+                Vec3(0.0f, 0.0f, h),
+                Vec3(0.0f, 0.0f, 1.0f));
+            camera.setPerspectiveProjection(10.0f, // field of view
+                0.1f, 10.0f);
         }
 
         // determine mouse cursor position in canvas
         const Vec2 mcurpos = { static_cast<float>(mouse_x / canvasToWindowScale),
-                               static_cast<float>(mouse_y / canvasToWindowScale)
-                             };
+            static_cast<float>(mouse_y / canvasToWindowScale) };
 
         // determine barycentric coords of debug triangle
         const Vec3 bary = testTri.barycentricCoordinates(mcurpos);

@@ -91,6 +91,7 @@
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>c:\src\boost_1_66_0\;$(SolutionDir)dep\SDL2-2.0.5\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CppLanguageStandard>c++1y</CppLanguageStandard>
+      <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -125,6 +126,9 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <LanguageStandard>stdcpp14</LanguageStandard>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ControlFlowGuard>false</ControlFlowGuard>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -158,6 +162,7 @@
     <ClCompile Include="Mat.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Render.cpp" />
+    <ClCompile Include="Triangle.cpp" />
     <ClCompile Include="UI.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +175,7 @@
     <ClInclude Include="PredicateQuicksort.hpp" />
     <ClInclude Include="Quat.hpp" />
     <ClInclude Include="Render.hpp" />
+    <ClInclude Include="Triangle.hpp" />
     <ClInclude Include="UI.hpp" />
     <ClInclude Include="Vec.hpp" />
   </ItemGroup>

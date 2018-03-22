@@ -3,12 +3,14 @@
 #include "Mat.hpp"
 #include "PredicateQuicksort.hpp"
 #include "boost/tokenizer.hpp"
+#include <array>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <string>
-#include <memory>
 
-Mesh Mesh::loadMesh(const std::string& meshname) {
+Mesh Mesh::loadMesh(const std::string& meshname)
+{
     const std::string filename = "models/" + meshname + ".obj";
 
     std::vector<Vec3> vertexdata;
@@ -53,7 +55,7 @@ Mesh Mesh::loadMesh(const std::string& meshname) {
             std::string fparams[3] = { tokens[1], tokens[2], tokens[3] };
 
             bool f_has_uvs = false; // seems inelegant but whatever
-            std::array<int,3> fv, fuv;
+            std::array<int, 3> fv, fuv;
 
             // Two possible formats for 'f' directive may be seen:
             //   f vertIDX_1 vertIDX_2 vertIDX_3
@@ -103,26 +105,28 @@ Mesh Mesh::loadMesh(const std::string& meshname) {
     }
 
     printf("loadMesh: loaded `%s` with %d faces, %d verts\n",
-           meshname.c_str(), facen, vertn);
+        meshname.c_str(), facen, vertn);
 
     return Mesh(vertexdata, facedata, uvdata, faceuvdata, meshname);
 }
 
 // TODO: err, what was I going to do with tmat?
-void Mesh::sortMeshTriangleDrawOrderFromCamera(/* const Mat& tmat, */ const Camera& camera) const {
+void Mesh::sortMeshTriangleDrawOrderFromCamera(/* const Mat& tmat, */ const Camera& camera) const
+{
     auto triSortValuator = [&](int facenum) -> float {
         const Vec3& eye = camera.getOrigin();
         const Triangle3 tri = getMeshFaceVertices(facenum);
         const Vec3 maxtv = Vec3(std::max(tri.a.x, std::max(tri.b.x, tri.c.x)),
-        std::max(tri.a.y, std::max(tri.b.y, tri.c.y)),
-        std::max(tri.a.z, std::max(tri.b.z, tri.c.z)));
+            std::max(tri.a.y, std::max(tri.b.y, tri.c.y)),
+            std::max(tri.a.z, std::max(tri.b.z, tri.c.z)));
         return comparativeVertexDistance(-eye, maxtv);
     };
 
     pQuicksort<unsigned short, float>(m_facesortbuffer, 0, m_facesortbuffer.size() - 1, triSortValuator);
 }
 
-std::unique_ptr<Bitmap> Mesh::loadTexture(const std::string& meshname) const {
+std::unique_ptr<Bitmap> Mesh::loadTexture(const std::string& meshname) const
+{
     // ugh
     const std::string partialfilename = meshname + ".data";
     const std::string fullfilename = "models/" + partialfilename;
