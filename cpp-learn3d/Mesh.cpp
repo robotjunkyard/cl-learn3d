@@ -104,8 +104,11 @@ Mesh Mesh::loadMesh(const std::string& meshname)
         }
     }
 
-    printf("loadMesh: loaded `%s` with %d faces, %d verts\n",
-        meshname.c_str(), facen, vertn);
+    printf("loadMesh: loaded `%s` with %d faces, %d verts  (%d bytes)\n",
+        meshname.c_str(), facen, vertn,
+        (sizeof(vertexdata[0]) * vertexdata.size())
+            + (sizeof(facedata[0]) * facedata.size())
+            + (sizeof(faceuvdata[0]) * faceuvdata.size()));
 
     return Mesh(vertexdata, facedata, uvdata, faceuvdata, meshname);
 }
